@@ -376,7 +376,7 @@ export default function CalendarTab({
   return (
     <div className="flex flex-col gap-5 pb-24 text-left">
       {/* 1. 당월 요약 카드 (남은 생활비 집계 제거) */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-150 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="bg-white p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
           <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ChevronLeft size={20} className="text-gray-600" />
@@ -403,7 +403,7 @@ export default function CalendarTab({
       </div>
 
       {/* 2. 격자 달력 뷰 */}
-      <div className="bg-white rounded-2xl border border-gray-150 overflow-hidden">
+      <div className="bg-white rounded-2xl overflow-hidden">
         <div className="grid grid-cols-7 border-b border-gray-100 text-center py-3 bg-gray-50/50 select-none">
           {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
             <span key={idx} className={`text-xs font-semibold ${idx === 0 ? 'text-red-500' : idx === 6 ? 'text-toss-blue' : 'text-gray-500'}`}>
@@ -411,7 +411,7 @@ export default function CalendarTab({
             </span>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-px bg-gray-100">
+        <div className="grid grid-cols-7 gap-px bg-gray-100/55">
           {calendarCells.map((cell, idx) => {
             const dateStr = formatDateString(cell.date);
             const { income, expense } = getDateStats(dateStr);
@@ -450,7 +450,7 @@ export default function CalendarTab({
       </div>
 
       {/* 3. 하단 상세 내역 영역 (일자별 +합, -합 작게 노출) */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-150">
+      <div className="bg-white p-5 rounded-2xl">
         <div className="flex justify-between items-center mb-1">
           <h3 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
             <CalendarIcon size={18} className="text-toss-blue" />
@@ -485,7 +485,7 @@ export default function CalendarTab({
               return (
                 <div key={record.id} className="flex justify-between items-center py-3.5 group animate-fade-in">
                   <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg border border-gray-150">
+                    <span className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg">
                       {catEmoji}
                     </span>
                     <div>
@@ -493,7 +493,7 @@ export default function CalendarTab({
                         <span className="font-bold text-sm text-gray-800">{record.category}</span>
                         {/* 1번 피드백: '반복' 대신 '1개월마다' 등 둥근 파란 모서리 네모로 상세내역에 규칙 노출 */}
                         {record.repeat && record.repeat !== 'none' && (
-                          <span className="bg-blue-50 text-toss-blue text-[9px] font-bold px-1.5 py-0.5 rounded-md select-none border border-blue-100">
+                          <span className="bg-blue-50 text-toss-blue text-[9px] font-bold px-1.5 py-0.5 rounded-md select-none">
                             {getRepeatLabel(record.repeat)}
                           </span>
                         )}
@@ -551,7 +551,7 @@ export default function CalendarTab({
       {/* 4. 입력/수정 모달 팝업 */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-2xl border border-gray-150 overflow-y-auto max-h-[90vh] animate-scale-up">
+          <div className="bg-white w-full max-w-md rounded-2xl border border-gray-150/40 overflow-y-auto max-h-[90vh] animate-scale-up">
             <div className="p-5 border-b border-gray-100 flex justify-between items-center">
               <h3 className="font-bold text-lg text-gray-800">
                 {editingRecord ? '내역 수정' : '신규 내역 등록'}
@@ -574,7 +574,7 @@ export default function CalendarTab({
                     }
                   }}
                   className={`py-2 rounded-lg text-sm font-bold transition-all ${
-                    formType === 'expense' ? 'bg-white text-expense border border-gray-150' : 'text-gray-400'
+                    formType === 'expense' ? 'bg-white text-expense shadow-[0_1px_3px_rgba(0,0,0,0.03)]' : 'text-gray-400'
                   }`}
                 >
                   지출 (-)
@@ -589,7 +589,7 @@ export default function CalendarTab({
                     }
                   }}
                   className={`py-2 rounded-lg text-sm font-bold transition-all ${
-                    formType === 'income' ? 'bg-white text-income border border-gray-150' : 'text-gray-400'
+                    formType === 'income' ? 'bg-white text-income shadow-[0_1px_3px_rgba(0,0,0,0.03)]' : 'text-gray-400'
                   }`}
                 >
                   수입 (+)
@@ -923,7 +923,7 @@ export default function CalendarTab({
                       )}
 
                       {/* 파란 가로 모서리가 둥근 네모 상자 내 정보 요약 노출 */}
-                      <div className="bg-blue-50/70 text-toss-blue border border-blue-200/50 rounded-xl px-4 py-3 text-xs font-extrabold select-none text-center">
+                      <div className="bg-blue-50/70 text-toss-blue rounded-xl px-4 py-3 text-xs font-extrabold select-none text-center">
                         {getRecurringSummaryText()}
                       </div>
 

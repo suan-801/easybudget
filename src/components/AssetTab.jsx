@@ -140,7 +140,7 @@ export default function AssetTab({
 
       {/* 2. 자산 추가/수정 양식 (접이식/인라인 폼) */}
       {isFormOpen && (
-        <div className="bg-white p-5 rounded-2xl border border-gray-150 animate-slide-down">
+        <div className="bg-white p-5 rounded-2xl animate-slide-down">
           <h3 className="font-bold text-sm text-gray-800 mb-3.5">
             {editingAsset ? '자산 정보 수정' : '새로운 자산 등록'}
           </h3>
@@ -208,7 +208,7 @@ export default function AssetTab({
       )}
 
       {/* 3. 자산 개별 목록 */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-150">
+      <div className="bg-white p-5 rounded-2xl">
         <h3 className="font-bold text-gray-800 text-sm mb-4">개별 자산 현황 (자산 선택 시 당월 내역 상세 노출)</h3>
         
         {assets.length === 0 ? (
@@ -295,7 +295,7 @@ export default function AssetTab({
 
       {/* 4. 선택된 자산의 당월 상세 내역 (8번 피드백: 당월 수입/지출 리스트 노출) */}
       {selectedAssetId && selectedAsset && (
-        <div className="bg-white p-5 rounded-2xl border border-gray-150 animate-slide-down">
+        <div className="bg-white p-5 rounded-2xl animate-slide-down">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-3 mb-4 gap-2.5">
             <div>
               <h4 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
@@ -307,7 +307,7 @@ export default function AssetTab({
               </span>
             </div>
             
-            <div className="flex gap-3 text-[10px] font-bold text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-xl border border-gray-200/50">
+            <div className="flex gap-3 text-[10px] font-bold text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-xl">
               <span className="text-income flex items-center gap-0.5">
                 <ArrowUpRight size={12} />
                 수입: +{formatAmount(assetIncome)}

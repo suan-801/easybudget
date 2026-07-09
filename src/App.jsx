@@ -201,9 +201,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans max-w-lg mx-auto bg-white border-x border-gray-150 relative">
+    <div className="min-h-screen bg-[#F2F4F6] flex flex-col font-sans max-w-lg mx-auto border-x border-gray-200/30 relative">
       {/* 1. 상단 공통 헤더 */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 px-5 py-4 flex justify-between items-center z-10">
+      <header className="sticky top-0 bg-white/85 backdrop-blur-md border-b border-gray-200/25 px-5 py-4 flex justify-between items-center z-10">
         <h1 
           onClick={() => handleTabChange('calendar')} 
           className="text-lg font-extrabold text-toss-blue tracking-tight cursor-pointer flex items-center gap-1.5 active:scale-95 transition-all"
@@ -229,7 +229,7 @@ export default function App() {
       </main>
 
       {/* 3. 하단 고정 네비게이션 탭 바 */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/90 backdrop-blur-md border-t border-gray-150 flex justify-around py-2.5 z-15 safe-pb">
+      <nav className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/90 backdrop-blur-md border-t border-gray-200/30 flex justify-around py-2.5 z-15 safe-pb">
         <button
           id="tab-calendar"
           onClick={() => setActiveTab('calendar')}
