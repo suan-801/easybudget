@@ -84,7 +84,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
       const data = payload[0].payload;
       const percentage = totalAmount > 0 ? ((data.value / totalAmount) * 100).toFixed(1) : 0;
       return (
-        <div className="bg-white p-3 rounded-xl shadow-toss border border-gray-100 text-xs">
+        <div className="bg-white p-3 rounded-xl border border-gray-150 text-xs">
           <p className="font-bold text-gray-800">{data.name}</p>
           <p className="text-toss-blue font-semibold mt-1">{formatAmount(data.value)}</p>
           <p className="text-gray-400 mt-0.5">{percentage}% 비중</p>
@@ -98,7 +98,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   const CustomBarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-xl shadow-toss border border-gray-100 text-xs">
+        <div className="bg-white p-3 rounded-xl border border-gray-150 text-xs">
           <p className="font-bold text-gray-800">{payload[0].payload.name}</p>
           <p className="text-toss-blue font-semibold mt-1">총액: {formatAmount(payload[0].value)}</p>
         </div>
@@ -118,7 +118,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   return (
     <div className="flex flex-col gap-5 pb-24 animate-fade-in">
       {/* 1. 분석 필터 컨트롤러 */}
-      <div className="bg-white p-4 rounded-2xl shadow-toss flex flex-col md:flex-row justify-between items-center gap-3">
+      <div className="bg-white p-4 rounded-2xl border border-gray-150 flex flex-col md:flex-row justify-between items-center gap-3">
         {/* 수입 / 지출 선택 */}
         <div className="flex bg-gray-100 p-1 rounded-xl w-full md:w-auto">
           <button
@@ -127,7 +127,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
               setSelectedGroupItem(null);
             }}
             className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-              analysisType === 'expense' ? 'bg-white text-expense shadow-sm' : 'text-gray-400'
+              analysisType === 'expense' ? 'bg-white text-expense border border-gray-150' : 'text-gray-400'
             }`}
           >
             지출 분석
@@ -138,7 +138,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
               setSelectedGroupItem(null);
             }}
             className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-              analysisType === 'income' ? 'bg-white text-income shadow-sm' : 'text-gray-400'
+              analysisType === 'income' ? 'bg-white text-income border border-gray-150' : 'text-gray-400'
             }`}
           >
             수입 분석
@@ -153,7 +153,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
               setSelectedGroupItem(null);
             }}
             className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-              groupBy === 'category' ? 'bg-white text-toss-blue shadow-sm' : 'text-gray-400'
+              groupBy === 'category' ? 'bg-white text-toss-blue border border-gray-150' : 'text-gray-400'
             }`}
           >
             카테고리별
@@ -164,7 +164,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
               setSelectedGroupItem(null);
             }}
             className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-              groupBy === 'paymentMethod' ? 'bg-white text-toss-blue shadow-sm' : 'text-gray-400'
+              groupBy === 'paymentMethod' ? 'bg-white text-toss-blue border border-gray-150' : 'text-gray-400'
             }`}
           >
             결제 수단별
@@ -175,7 +175,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
       {/* 2. 메인 통계 및 원형 차트 영역 */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* 비중 리스트 카드 */}
-        <div className="lg:col-span-2 bg-white p-5 rounded-2xl shadow-toss flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-gray-150 flex flex-col justify-between">
           <div>
             <h3 className="font-bold text-gray-800 text-sm mb-4 flex items-center gap-1.5">
               <PieChartIcon size={16} className="text-toss-blue" />
@@ -225,7 +225,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
         </div>
 
         {/* 차트 렌더링 카드 */}
-        <div className="lg:col-span-3 bg-white p-5 rounded-2xl shadow-toss flex flex-col items-center justify-center min-h-[300px]">
+        <div className="lg:col-span-3 bg-white p-5 rounded-2xl border border-gray-150 flex flex-col items-center justify-center min-h-[300px]">
           {pieData.length === 0 ? (
             <div className="text-gray-400 text-sm flex flex-col items-center gap-2">
               <Info size={32} className="text-gray-300" />
@@ -265,7 +265,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
 
       {/* 3. 항목별 월별 추이 차트 (드릴다운 화면) */}
       {selectedGroupItem && (
-        <div className="bg-white p-5 rounded-2xl shadow-toss animate-slide-up">
+        <div className="bg-white p-5 rounded-2xl border border-gray-150 animate-slide-up">
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">

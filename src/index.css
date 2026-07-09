@@ -12,9 +12,9 @@
   --color-expense-dark: #D8323F;
   --color-bg-gray: #F9FAFB;
   
-  --shadow-toss: 0 8px 24px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --shadow-toss-lg: 0 16px 40px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.02);
-  --shadow-toss-3d: 0 10px 25px -5px rgba(49, 130, 246, 0.15), 0 8px 16px -6px rgba(49, 130, 246, 0.1), inset 0 1px 1px 0 rgba(255, 255, 255, 0.3);
+  --shadow-toss: none;
+  --shadow-toss-lg: none;
+  --shadow-toss-3d: none;
 }
 
 /* Base styles */

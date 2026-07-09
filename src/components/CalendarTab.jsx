@@ -376,7 +376,7 @@ export default function CalendarTab({
   return (
     <div className="flex flex-col gap-5 pb-24 text-left">
       {/* 1. 당월 요약 카드 (남은 생활비 집계 제거) */}
-      <div className="bg-white p-5 rounded-2xl shadow-toss flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="bg-white p-5 rounded-2xl border border-gray-150 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
           <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ChevronLeft size={20} className="text-gray-600" />
@@ -403,7 +403,7 @@ export default function CalendarTab({
       </div>
 
       {/* 2. 격자 달력 뷰 */}
-      <div className="bg-white rounded-2xl shadow-toss overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-150 overflow-hidden">
         <div className="grid grid-cols-7 border-b border-gray-100 text-center py-3 bg-gray-50/50 select-none">
           {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
             <span key={idx} className={`text-xs font-semibold ${idx === 0 ? 'text-red-500' : idx === 6 ? 'text-toss-blue' : 'text-gray-500'}`}>
@@ -450,7 +450,7 @@ export default function CalendarTab({
       </div>
 
       {/* 3. 하단 상세 내역 영역 (일자별 +합, -합 작게 노출) */}
-      <div className="bg-white p-5 rounded-2xl shadow-toss">
+      <div className="bg-white p-5 rounded-2xl border border-gray-150">
         <div className="flex justify-between items-center mb-1">
           <h3 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
             <CalendarIcon size={18} className="text-toss-blue" />
@@ -458,7 +458,7 @@ export default function CalendarTab({
           </h3>
           <button
             onClick={() => openAddModal(selectedDate)}
-            className="flex items-center gap-1 bg-toss-blue text-white px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-toss-blue-dark active:scale-95 transition-all shadow-toss-3d"
+            className="flex items-center gap-1 bg-toss-blue text-white px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-toss-blue-dark active:scale-95 transition-all"
           >
             <Plus size={14} />
             내역 추가
@@ -485,7 +485,7 @@ export default function CalendarTab({
               return (
                 <div key={record.id} className="flex justify-between items-center py-3.5 group animate-fade-in">
                   <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg shadow-sm">
+                    <span className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg border border-gray-150">
                       {catEmoji}
                     </span>
                     <div>
@@ -551,7 +551,7 @@ export default function CalendarTab({
       {/* 4. 입력/수정 모달 팝업 */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-toss-lg overflow-y-auto max-h-[90vh] animate-scale-up">
+          <div className="bg-white w-full max-w-md rounded-2xl border border-gray-150 overflow-y-auto max-h-[90vh] animate-scale-up">
             <div className="p-5 border-b border-gray-100 flex justify-between items-center">
               <h3 className="font-bold text-lg text-gray-800">
                 {editingRecord ? '내역 수정' : '신규 내역 등록'}
@@ -574,7 +574,7 @@ export default function CalendarTab({
                     }
                   }}
                   className={`py-2 rounded-lg text-sm font-bold transition-all ${
-                    formType === 'expense' ? 'bg-white text-expense shadow-sm' : 'text-gray-400'
+                    formType === 'expense' ? 'bg-white text-expense border border-gray-150' : 'text-gray-400'
                   }`}
                 >
                   지출 (-)
@@ -589,7 +589,7 @@ export default function CalendarTab({
                     }
                   }}
                   className={`py-2 rounded-lg text-sm font-bold transition-all ${
-                    formType === 'income' ? 'bg-white text-income shadow-sm' : 'text-gray-400'
+                    formType === 'income' ? 'bg-white text-income border border-gray-150' : 'text-gray-400'
                   }`}
                 >
                   수입 (+)
@@ -885,7 +885,7 @@ export default function CalendarTab({
                               type="button"
                               onClick={() => setRecEndType(type)}
                               className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                                recEndType === type ? 'bg-toss-blue text-white shadow-xs' : 'bg-white border border-gray-200 text-gray-400'
+                                recEndType === type ? 'bg-toss-blue text-white' : 'bg-white border border-gray-200 text-gray-400'
                               }`}
                             >
                               {type === 'none' ? '미지정' : type === 'date' ? '종료일' : '횟수'}
@@ -923,7 +923,7 @@ export default function CalendarTab({
                       )}
 
                       {/* 파란 가로 모서리가 둥근 네모 상자 내 정보 요약 노출 */}
-                      <div className="bg-blue-50/70 text-toss-blue border border-blue-200/50 rounded-xl px-4 py-3 text-xs font-extrabold select-none text-center shadow-xs">
+                      <div className="bg-blue-50/70 text-toss-blue border border-blue-200/50 rounded-xl px-4 py-3 text-xs font-extrabold select-none text-center">
                         {getRecurringSummaryText()}
                       </div>
 
@@ -947,7 +947,7 @@ export default function CalendarTab({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-toss-blue text-white font-bold py-3 rounded-xl text-sm hover:bg-toss-blue-dark active:scale-95 transition-all shadow-toss-3d"
+                  className="flex-1 bg-toss-blue text-white font-bold py-3 rounded-xl text-sm hover:bg-toss-blue-dark active:scale-95 transition-all"
                 >
                   {editingRecord ? '변경 내용 적용' : '내역 추가 완료'}
                 </button>

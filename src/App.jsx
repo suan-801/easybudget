@@ -45,7 +45,7 @@ export default function App() {
   if (dbError) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-5">
-        <div className="bg-white p-6 rounded-2xl shadow-toss text-center max-w-sm">
+        <div className="bg-white p-6 rounded-2xl border border-gray-150 text-center max-w-sm">
           <h2 className="text-lg font-bold text-red-500 mb-2">데이터베이스 오류</h2>
           <p className="text-sm text-gray-500 mb-4">{dbError}</p>
           <button 
@@ -201,7 +201,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans max-w-lg mx-auto bg-white shadow-lg relative">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans max-w-lg mx-auto bg-white border-x border-gray-150 relative">
       {/* 1. 상단 공통 헤더 */}
       <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 px-5 py-4 flex justify-between items-center z-10">
         <h1 
@@ -229,7 +229,7 @@ export default function App() {
       </main>
 
       {/* 3. 하단 고정 네비게이션 탭 바 */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around py-2.5 z-15 safe-pb shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+      <nav className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/90 backdrop-blur-md border-t border-gray-150 flex justify-around py-2.5 z-15 safe-pb">
         <button
           id="tab-calendar"
           onClick={() => setActiveTab('calendar')}

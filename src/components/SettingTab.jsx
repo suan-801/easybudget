@@ -207,9 +207,9 @@ export default function SettingTab({
 
   return (
     // 모바일에서의 가로 삐져나옴 방지를 위해 패딩(p-3.5 sm:p-5) 및 rounded 유연화
-    <div className="flex flex-col gap-5 pb-24 animate-fade-in text-left bg-gray-100/70 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl min-h-screen border border-gray-200/50 shadow-inner w-full max-w-full overflow-hidden">
+    <div className="flex flex-col gap-5 pb-24 animate-fade-in text-left bg-gray-100/70 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl min-h-screen border border-gray-200/50 w-full max-w-full overflow-hidden">
       {/* 1. 경고 및 백업 안내 카드 */}
-      <div className="bg-red-50 border border-red-100 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl flex gap-3 shadow-xs">
+      <div className="bg-red-50 border border-red-100 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl flex gap-3">
         <AlertTriangle className="text-red-500 shrink-0" size={18} />
         <div>
           <span className="text-[11px] sm:text-xs font-bold text-red-800">데이터 유실 경고</span>
@@ -220,7 +220,7 @@ export default function SettingTab({
       </div>
 
       {/* 2. 데이터 백업 / 복구 */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-toss border border-gray-150/60 w-full overflow-hidden">
+      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-gray-150/60 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-3 flex items-center gap-1.5">
           <Settings size={16} className="text-toss-blue" />
           데이터 백업 및 가져오기
@@ -229,13 +229,13 @@ export default function SettingTab({
         <div className="grid grid-cols-2 gap-2.5 mt-4">
           <button
             onClick={handleExportExcel}
-            className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-100 text-gray-700 hover:bg-gray-100 active:scale-98 py-3 rounded-xl text-xs font-bold transition-all shadow-xs"
+            className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-100 text-gray-700 hover:bg-gray-100 active:scale-98 py-3 rounded-xl text-xs font-bold transition-all"
           >
             <FileDown size={14} className="text-gray-500" />
             엑셀 백업
           </button>
           
-          <label className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-100 text-gray-700 hover:bg-gray-100 active:scale-98 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs">
+          <label className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-100 text-gray-700 hover:bg-gray-100 active:scale-98 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer">
             <FileUp size={14} className="text-gray-500" />
             백업 가져오기
             <input
@@ -249,7 +249,7 @@ export default function SettingTab({
       </div>
 
       {/* 3. 분석 기준일 설정 */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-toss border border-gray-150/60 w-full overflow-hidden">
+      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-gray-150/60 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-1.5 flex items-center gap-1.5">
           <CalendarDays size={16} className="text-toss-blue" />
           분석 기간 기준일 설정
@@ -263,7 +263,7 @@ export default function SettingTab({
             <select
               value={tempBaseDay}
               onChange={(e) => setTempBaseDay(e.target.value)}
-              className="w-full bg-gray-50 border-0 focus:ring-2 focus:ring-toss-blue rounded-xl py-2 px-3 text-xs font-bold text-gray-800 shadow-xs"
+              className="w-full bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-toss-blue rounded-xl py-2 px-3 text-xs font-bold text-gray-800"
             >
               {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
                 <option key={day} value={day}>매월 {day}일</option>
@@ -273,7 +273,7 @@ export default function SettingTab({
           </div>
           <button
             onClick={handleSaveBaseDay}
-            className="flex-1 sm:flex-none bg-toss-blue text-white hover:bg-toss-blue-dark active:scale-95 px-3 py-2 rounded-xl text-xs font-bold shadow-toss-3d transition-all text-center"
+            className="flex-1 sm:flex-none bg-toss-blue text-white hover:bg-toss-blue-dark active:scale-95 px-3 py-2 rounded-xl text-xs font-bold transition-all text-center"
           >
             변경 저장
           </button>
@@ -281,7 +281,7 @@ export default function SettingTab({
       </div>
 
       {/* 4. 카테고리 관리 (모바일 삐져나옴 원천 차단 개편) */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-toss border border-gray-150/60 w-full overflow-hidden">
+      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-gray-150/60 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-3">카테고리 관리</h3>
         
         {/* 새 카테고리 등록 양식 - 모바일에서 유연하게 wrap 되도록 flex-wrap 설정 */}
@@ -289,7 +289,7 @@ export default function SettingTab({
           <select
             value={newCatType}
             onChange={(e) => setNewCatType(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg text-[10px] font-bold py-1 px-1.5 shadow-xs cursor-pointer focus:ring-1 focus:ring-toss-blue w-[56px] shrink-0"
+            className="bg-white border border-gray-200 rounded-lg text-[10px] font-bold py-1 px-1.5 cursor-pointer focus:ring-1 focus:ring-toss-blue w-[56px] shrink-0"
           >
             <option value="expense">지출</option>
             <option value="income">수입</option>
@@ -297,7 +297,7 @@ export default function SettingTab({
           <select
             value={newCatEmoji}
             onChange={(e) => setNewCatEmoji(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg text-xs py-1 px-1 shadow-xs cursor-pointer focus:ring-1 focus:ring-toss-blue w-[44px] shrink-0"
+            className="bg-white border border-gray-200 rounded-lg text-xs py-1 px-1 cursor-pointer focus:ring-1 focus:ring-toss-blue w-[44px] shrink-0"
           >
             {emojis.map(e => <option key={e} value={e}>{e}</option>)}
           </select>
@@ -307,11 +307,11 @@ export default function SettingTab({
             placeholder="카테고리 이름"
             value={newCatName}
             onChange={(e) => setNewCatName(e.target.value)}
-            className="flex-1 min-w-[70px] bg-white border border-gray-200 focus:ring-2 focus:ring-toss-blue rounded-lg py-1 px-2 text-xs text-gray-800 shadow-xs"
+            className="flex-1 min-w-[70px] bg-white border border-gray-200 focus:ring-2 focus:ring-toss-blue rounded-lg py-1 px-2 text-xs text-gray-800"
           />
           <button
             type="submit"
-            className="bg-toss-blue text-white hover:bg-toss-blue-dark px-3 py-1 rounded-lg text-xs font-bold transition-all shadow-toss-3d shrink-0"
+            className="bg-toss-blue text-white hover:bg-toss-blue-dark px-3 py-1 rounded-lg text-xs font-bold transition-all shrink-0"
           >
             추가
           </button>
@@ -340,7 +340,7 @@ export default function SettingTab({
                       
                       {/* 미니 이모지 격자 팝오버 - 가로 폭 넘치지 않게 left-0 및 z-index 설정 */}
                       {isPickerOpen && (
-                        <div className="absolute left-0 top-9 z-30 bg-white border border-gray-250 p-2 rounded-xl grid grid-cols-5 gap-1 shadow-xl animate-scale-up max-w-[210px]">
+                        <div className="absolute left-0 top-9 z-30 bg-white border border-gray-250 p-2 rounded-xl grid grid-cols-5 gap-1 animate-scale-up max-w-[210px]">
                           {emojis.map(emo => (
                             <span 
                               key={emo} 
@@ -386,7 +386,7 @@ export default function SettingTab({
                       <span className="font-semibold text-gray-700 truncate">{c.name}</span>
                       
                       {isPickerOpen && (
-                        <div className="absolute left-0 top-9 z-30 bg-white border border-gray-250 p-2 rounded-xl grid grid-cols-5 gap-1 shadow-xl animate-scale-up max-w-[210px]">
+                        <div className="absolute left-0 top-9 z-30 bg-white border border-gray-250 p-2 rounded-xl grid grid-cols-5 gap-1 animate-scale-up max-w-[210px]">
                           {emojis.map(emo => (
                             <span 
                               key={emo} 
@@ -416,7 +416,7 @@ export default function SettingTab({
       </div>
 
       {/* 5. 결제 수단 관리 */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-toss border border-gray-150/60 w-full overflow-hidden">
+      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-gray-150/60 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-3">결제 수단 관리</h3>
         
         {/* 새 결제수단 등록 양식 */}
@@ -427,11 +427,11 @@ export default function SettingTab({
             placeholder="결제 수단 이름 (예: 카드)"
             value={newPayName}
             onChange={(e) => setNewPayName(e.target.value)}
-            className="flex-1 bg-white border border-gray-200 focus:ring-2 focus:ring-toss-blue rounded-lg py-1 px-2 text-xs text-gray-800 shadow-xs"
+            className="flex-1 bg-white border border-gray-200 focus:ring-2 focus:ring-toss-blue rounded-lg py-1 px-2 text-xs text-gray-800"
           />
           <button
             type="submit"
-            className="bg-toss-blue text-white hover:bg-toss-blue-dark px-3 py-1 rounded-lg text-xs font-bold transition-all shadow-toss-3d shrink-0"
+            className="bg-toss-blue text-white hover:bg-toss-blue-dark px-3 py-1 rounded-lg text-xs font-bold transition-all shrink-0"
           >
             추가
           </button>
@@ -455,7 +455,7 @@ export default function SettingTab({
       </div>
 
       {/* 6. 반복 규칙 목록 관리 */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-toss border border-gray-150/60 w-full overflow-hidden">
+      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-gray-150/60 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-1.5 flex items-center gap-1.5">
           <RefreshCw size={16} className="text-toss-blue" />
           반복 가계부 규칙 관리

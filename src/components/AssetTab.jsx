@@ -119,7 +119,7 @@ export default function AssetTab({
   return (
     <div className="flex flex-col gap-5 pb-24 animate-fade-in text-left">
       {/* 1. 전체 자산 총액 요약 카드 */}
-      <div className="bg-gradient-to-br from-toss-blue to-toss-blue-dark p-6 rounded-2xl text-white shadow-toss-3d flex flex-col justify-between min-h-[140px]">
+      <div className="bg-toss-blue p-6 rounded-2xl text-white flex flex-col justify-between min-h-[140px]">
         <div>
           <span className="text-white/70 text-xs font-bold tracking-wider">나의 순자산 총액</span>
           <h2 className="text-2xl font-extrabold mt-1 tracking-tight">
@@ -140,7 +140,7 @@ export default function AssetTab({
 
       {/* 2. 자산 추가/수정 양식 (접이식/인라인 폼) */}
       {isFormOpen && (
-        <div className="bg-white p-5 rounded-2xl shadow-toss border border-blue-100/50 animate-slide-down">
+        <div className="bg-white p-5 rounded-2xl border border-gray-150 animate-slide-down">
           <h3 className="font-bold text-sm text-gray-800 mb-3.5">
             {editingAsset ? '자산 정보 수정' : '새로운 자산 등록'}
           </h3>
@@ -198,7 +198,7 @@ export default function AssetTab({
               </button>
               <button
                 type="submit"
-                className="bg-toss-blue text-white hover:bg-toss-blue-dark px-4 py-2 rounded-xl font-bold shadow-toss-3d"
+                className="bg-toss-blue text-white hover:bg-toss-blue-dark px-4 py-2 rounded-xl font-bold transition-all"
               >
                 {editingAsset ? '수정 완료' : '추가하기'}
               </button>
@@ -208,7 +208,7 @@ export default function AssetTab({
       )}
 
       {/* 3. 자산 개별 목록 */}
-      <div className="bg-white p-5 rounded-2xl shadow-toss">
+      <div className="bg-white p-5 rounded-2xl border border-gray-150">
         <h3 className="font-bold text-gray-800 text-sm mb-4">개별 자산 현황 (자산 선택 시 당월 내역 상세 노출)</h3>
         
         {assets.length === 0 ? (
@@ -295,7 +295,7 @@ export default function AssetTab({
 
       {/* 4. 선택된 자산의 당월 상세 내역 (8번 피드백: 당월 수입/지출 리스트 노출) */}
       {selectedAssetId && selectedAsset && (
-        <div className="bg-white p-5 rounded-2xl shadow-toss border border-blue-50/50 animate-slide-down">
+        <div className="bg-white p-5 rounded-2xl border border-gray-150 animate-slide-down">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-3 mb-4 gap-2.5">
             <div>
               <h4 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
