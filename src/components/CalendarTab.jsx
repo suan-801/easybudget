@@ -374,9 +374,9 @@ export default function CalendarTab({
   };
 
   return (
-    <div className="flex flex-col gap-5 pb-24 text-left">
-      {/* 1. 당월 요약 카드 (남은 생활비 집계 제거) */}
-      <div className="bg-white p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+    <div className="flex flex-col pb-24 text-left">
+      {/* 1. 당월 요약 영역 */}
+      <div className="py-2.5 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
           <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ChevronLeft size={20} className="text-gray-600" />
@@ -402,8 +402,12 @@ export default function CalendarTab({
         </div>
       </div>
 
+
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
       {/* 2. 격자 달력 뷰 */}
-      <div className="bg-white rounded-2xl overflow-hidden">
+      <div className="overflow-hidden">
         <div className="grid grid-cols-7 border-b border-gray-100 text-center py-3 bg-gray-50/50 select-none">
           {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
             <span key={idx} className={`text-xs font-semibold ${idx === 0 ? 'text-red-500' : idx === 6 ? 'text-toss-blue' : 'text-gray-500'}`}>
@@ -449,8 +453,12 @@ export default function CalendarTab({
         </div>
       </div>
 
+
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
       {/* 3. 하단 상세 내역 영역 (일자별 +합, -합 작게 노출) */}
-      <div className="bg-white p-5 rounded-2xl">
+      <div className="py-2">
         <div className="flex justify-between items-center mb-1">
           <h3 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
             <CalendarIcon size={18} className="text-toss-blue" />

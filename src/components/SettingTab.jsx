@@ -206,8 +206,7 @@ export default function SettingTab({
   };
 
   return (
-    // 모바일에서의 가로 삐져나옴 방지를 위해 패딩(p-3.5 sm:p-5) 및 rounded 유연화
-    <div className="flex flex-col gap-5 pb-24 animate-fade-in text-left bg-transparent p-1 sm:p-1.5 rounded-2xl min-h-screen w-full max-w-full overflow-hidden">
+    <div className="flex flex-col pb-24 animate-fade-in text-left bg-transparent min-h-screen w-full max-w-full overflow-hidden">
       {/* 1. 경고 및 백업 안내 카드 */}
       <div className="bg-red-50/70 border border-red-100/50 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl flex gap-3">
         <AlertTriangle className="text-red-500 shrink-0" size={18} />
@@ -220,7 +219,7 @@ export default function SettingTab({
       </div>
 
       {/* 2. 데이터 백업 / 복구 */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl w-full overflow-hidden">
+      <div className="py-4 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-3 flex items-center gap-1.5">
           <Settings size={16} className="text-toss-blue" />
           데이터 백업 및 가져오기
@@ -248,8 +247,11 @@ export default function SettingTab({
         </div>
       </div>
 
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
       {/* 3. 분석 기준일 설정 */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl w-full overflow-hidden">
+      <div className="py-4 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-1.5 flex items-center gap-1.5">
           <CalendarDays size={16} className="text-toss-blue" />
           분석 기간 기준일 설정
@@ -280,8 +282,11 @@ export default function SettingTab({
         </div>
       </div>
 
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
       {/* 4. 카테고리 관리 (모바일 삐져나옴 원천 차단 개편) */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl w-full overflow-hidden">
+      <div className="py-4 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-3">카테고리 관리</h3>
         
         {/* 새 카테고리 등록 양식 - 모바일에서 유연하게 wrap 되도록 flex-wrap 설정 */}
@@ -415,8 +420,11 @@ export default function SettingTab({
         </div>
       </div>
 
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
       {/* 5. 결제 수단 관리 */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl w-full overflow-hidden">
+      <div className="py-4 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-3">결제 수단 관리</h3>
         
         {/* 새 결제수단 등록 양식 */}
@@ -454,8 +462,11 @@ export default function SettingTab({
         </div>
       </div>
 
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
       {/* 6. 반복 규칙 목록 관리 */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl w-full overflow-hidden">
+      <div className="py-4 w-full overflow-hidden">
         <h3 className="font-bold text-gray-800 text-sm mb-1.5 flex items-center gap-1.5">
           <RefreshCw size={16} className="text-toss-blue" />
           반복 가계부 규칙 관리

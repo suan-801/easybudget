@@ -201,7 +201,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F4F6] flex flex-col font-sans max-w-lg mx-auto border-x border-gray-200/30 relative">
+    <div className="min-h-screen bg-white flex flex-col font-sans max-w-lg mx-auto border-x border-gray-200/30 relative">
       {/* 1. 상단 공통 헤더 */}
       <header className="sticky top-0 bg-white/85 backdrop-blur-md border-b border-gray-200/25 px-5 py-4 flex justify-between items-center z-10">
         <h1 

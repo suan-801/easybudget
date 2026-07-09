@@ -116,9 +116,9 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   };
 
   return (
-    <div className="flex flex-col gap-5 pb-24 animate-fade-in">
+    <div className="flex flex-col pb-24 animate-fade-in">
       {/* 1. 분석 필터 컨트롤러 */}
-      <div className="bg-white p-4 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-3">
+      <div className="py-2.5 flex flex-col md:flex-row justify-between items-center gap-3">
         {/* 수입 / 지출 선택 */}
         <div className="flex bg-gray-100 p-1 rounded-xl w-full md:w-auto">
           <button
@@ -172,10 +172,13 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
         </div>
       </div>
 
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
       {/* 2. 메인 통계 및 원형 차트 영역 */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* 비중 리스트 카드 */}
-        <div className="lg:col-span-2 bg-white p-5 rounded-2xl flex flex-col justify-between">
+        <div className="lg:col-span-2 py-4 flex flex-col justify-between">
           <div>
             <h3 className="font-bold text-gray-800 text-sm mb-4 flex items-center gap-1.5">
               <PieChartIcon size={16} className="text-toss-blue" />
@@ -225,7 +228,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
         </div>
 
         {/* 차트 렌더링 카드 */}
-        <div className="lg:col-span-3 bg-white p-5 rounded-2xl flex flex-col items-center justify-center min-h-[300px]">
+        <div className="lg:col-span-3 py-4 flex flex-col items-center justify-center min-h-[300px]">
           {pieData.length === 0 ? (
             <div className="text-gray-400 text-sm flex flex-col items-center gap-2">
               <Info size={32} className="text-gray-300" />
@@ -265,7 +268,10 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
 
       {/* 3. 항목별 월별 추이 차트 (드릴다운 화면) */}
       {selectedGroupItem && (
-        <div className="bg-white p-5 rounded-2xl animate-slide-up">
+        <>
+          {/* 디바이더 밴드 */}
+          <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+          <div className="py-4 animate-slide-up">
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
@@ -304,7 +310,8 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
