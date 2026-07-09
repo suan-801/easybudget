@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  
+  --color-toss-blue: #3182F6;
+  --color-toss-blue-light: #5398F8;
+  --color-toss-blue-dark: #1B6ADF;
+  --color-income: #00D387;
+  --color-income-dark: #00B372;
+  --color-expense: #F04452;
+  --color-expense-dark: #D8323F;
+  --color-bg-gray: #F9FAFB;
+  
+  --shadow-toss: 0 8px 24px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-toss-lg: 0 16px 40px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.02);
+  --shadow-toss-3d: 0 10px 25px -5px rgba(49, 130, 246, 0.15), 0 8px 16px -6px rgba(49, 130, 246, 0.1), inset 0 1px 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Base styles */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg-gray);
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom Scrollbar for clean mobile feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E5E8EB;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #CCD2E3;
+}
+
+/* Safe Area Padding for mobile notch devices */
+.safe-pb {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+}
+
