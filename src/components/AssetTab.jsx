@@ -180,9 +180,11 @@ export default function AssetTab({
                 <div className="relative">
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     required
                     placeholder="0"
-                    value={assetBalance}
+                    value={assetBalance ? Number(assetBalance).toLocaleString('ko-KR') : ''}
                     onChange={handleBalanceChange}
                     className="w-full bg-gray-50 border-0 focus:ring-2 focus:ring-toss-blue rounded-xl py-2 pl-3 pr-8 text-xs text-right font-bold text-gray-800"
                   />

@@ -71,7 +71,32 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
     return months;
   };
 
+  // 4. 월별 전체 수입 / 지출 합산 트렌드 데이터 가공
+  const getOverallMonthlyData = () => {
+    const months = Array.from({ length: 12 }, (_, i) => ({
+      name: `${i + 1}월`,
+      monthIndex: i,
+      income: 0,
+      expense: 0
+    }));
+
+    records.forEach(r => {
+      const date = new Date(r.date);
+      if (date.getFullYear() === currentYear) {
+        const m = date.getMonth();
+        if (r.type === 'income') {
+          months[m].income += Number(r.amount);
+        } else if (r.type === 'expense') {
+          months[m].expense += Number(r.amount);
+        }
+      }
+    });
+
+    return months;
+  };
+
   const trendData = selectedGroupItem ? getMonthlyTrendData(selectedGroupItem) : [];
+  const overallTrendData = getOverallMonthlyData();
 
   // 금액 포맷터
   const formatAmount = (num) => {
@@ -84,7 +109,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
       const data = payload[0].payload;
       const percentage = totalAmount > 0 ? ((data.value / totalAmount) * 100).toFixed(1) : 0;
       return (
-        <div className="bg-white p-3 rounded-xl border border-gray-200/40 text-xs">
+        <div className="bg-white p-3 rounded-xl border border-gray-200/40 text-xs shadow-md">
           <p className="font-bold text-gray-800">{data.name}</p>
           <p className="text-toss-blue font-semibold mt-1">{formatAmount(data.value)}</p>
           <p className="text-gray-400 mt-0.5">{percentage}% 비중</p>
@@ -94,13 +119,31 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
     return null;
   };
 
-  // 막대 차트 커스텀 툴팁
+  // 단일 항목 막대 차트 커스텀 툴팁
   const CustomBarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-xl border border-gray-200/40 text-xs">
+        <div className="bg-white p-3 rounded-xl border border-gray-200/40 text-xs shadow-md">
           <p className="font-bold text-gray-800">{payload[0].payload.name}</p>
           <p className="text-toss-blue font-semibold mt-1">총액: {formatAmount(payload[0].value)}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // 전체 수입/지출 비교 막대 차트 커스텀 툴팁
+  const CustomOverallTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-3 rounded-xl border border-gray-200/40 text-xs shadow-md">
+          <p className="font-bold text-gray-800">{data.name} 전체 성과</p>
+          <p className="text-income font-semibold mt-1">수입: {formatAmount(data.income)}</p>
+          <p className="text-expense font-semibold mt-0.5">지출: {formatAmount(data.expense)}</p>
+          <p className="text-toss-blue font-bold mt-1 border-t border-gray-150 pt-1">
+            순소비: {formatAmount(data.income - data.expense)}
+          </p>
         </div>
       );
     }
@@ -116,7 +159,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   };
 
   return (
-    <div className="flex flex-col pb-24 animate-fade-in">
+    <div className="flex flex-col pb-24 animate-fade-in text-left">
       {/* 1. 분석 필터 컨트롤러 */}
       <div className="py-2.5 flex flex-col md:flex-row justify-between items-center gap-3">
         {/* 수입 / 지출 선택 */}
@@ -175,131 +218,143 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
       {/* 디바이더 밴드 */}
       <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
 
-      {/* 2. 메인 통계 및 원형 차트 영역 */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        {/* 비중 리스트 카드 */}
-        <div className="lg:col-span-2 py-4 flex flex-col justify-between">
-          <div>
-            <h3 className="font-bold text-gray-800 text-sm mb-4 flex items-center gap-1.5">
-              <PieChartIcon size={16} className="text-toss-blue" />
-              {analysisType === 'expense' ? '지출' : '수입'} 비중 목록
-            </h3>
-            
-            <div className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-1">
-              {pieData.length === 0 ? (
-                <div className="py-12 flex flex-col items-center justify-center text-gray-400 gap-2">
-                  <Info size={24} className="text-gray-300" />
-                  <span className="text-xs">데이터가 존재하지 않습니다.</span>
-                </div>
-              ) : (
-                pieData.map((item, index) => {
-                  const pct = totalAmount > 0 ? ((item.value / totalAmount) * 100).toFixed(1) : 0;
-                  const color = COLORS[index % COLORS.length];
-                  const catEmoji = groupBy === 'category' ? categories.find(c => c.name === item.name)?.emoji || '📁' : '💳';
-                  
-                  return (
-                    <div
-                      key={item.name}
-                      onClick={() => setSelectedGroupItem(item.name)}
-                      className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 ${
-                        selectedGroupItem === item.name ? 'bg-blue-50/50 ring-1 ring-toss-blue/30' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></span>
-                        <span className="text-xs text-gray-400 font-medium">{catEmoji}</span>
-                        <span className="text-xs font-bold text-gray-700">{item.name}</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs font-bold text-gray-800">{formatAmount(item.value)}</div>
-                        <div className="text-[10px] text-gray-400 font-medium">{pct}%</div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+      {/* 2. 원형 차트 영역 (상단) */}
+      <div className="py-4 flex flex-col items-center justify-center min-h-[260px] bg-white rounded-2xl border border-gray-150/40 p-4">
+        <h3 className="font-bold text-gray-800 text-sm self-start mb-2 flex items-center gap-1.5 select-none">
+          <PieChartIcon size={16} className="text-toss-blue" />
+          {analysisType === 'expense' ? '지출' : '수입'} 비중 분포
+        </h3>
+        {pieData.length === 0 ? (
+          <div className="text-gray-400 text-sm flex flex-col items-center gap-2 py-12">
+            <Info size={32} className="text-gray-300" />
+            <span>차트를 렌더링할 데이터가 부족합니다.</span>
+          </div>
+        ) : (
+          <div className="w-full h-[240px] relative">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={85}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomPieTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none mt-[-10px]">
+              <span className="block text-[10px] font-bold text-gray-400 tracking-wider">TOTAL</span>
+              <span className="text-base font-extrabold text-gray-800 block truncate max-w-[140px] mx-auto">
+                {Number(totalAmount).toLocaleString('ko-KR')}원
+              </span>
             </div>
           </div>
-          
-          <div className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center">
-            <span className="text-xs font-bold text-gray-400">총합</span>
-            <span className="text-sm font-extrabold text-gray-800">{formatAmount(totalAmount)}</span>
-          </div>
-        </div>
+        )}
+      </div>
 
-        {/* 차트 렌더링 카드 */}
-        <div className="lg:col-span-3 py-4 flex flex-col items-center justify-center min-h-[300px]">
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
+      {/* 3. 비중 목록 영역 (중단) */}
+      <div className="py-4 flex flex-col bg-white rounded-2xl border border-gray-150/40 p-5">
+        <h3 className="font-bold text-gray-800 text-sm mb-4 flex items-center gap-1.5 select-none">
+          <PieChartIcon size={16} className="text-toss-blue" />
+          {analysisType === 'expense' ? '지출' : '수입'} 비중 상세 목록
+        </h3>
+        
+        {/* 잘림 방지를 위해 리스트 컨테이너에 px-1 추가 */}
+        <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1 pl-1 py-1">
           {pieData.length === 0 ? (
-            <div className="text-gray-400 text-sm flex flex-col items-center gap-2">
-              <Info size={32} className="text-gray-300" />
-              <span>차트를 렌더링할 데이터가 부족합니다.</span>
+            <div className="py-12 flex flex-col items-center justify-center text-gray-400 gap-2">
+              <Info size={24} className="text-gray-300" />
+              <span className="text-xs">데이터가 존재하지 않습니다.</span>
             </div>
           ) : (
-            <div className="w-full h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={65}
-                    outerRadius={95}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomPieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="text-center -mt-36">
-                <span className="block text-[10px] font-bold text-gray-400 tracking-wider">TOTAL</span>
-                <span className="text-base font-extrabold text-gray-800 block truncate max-w-[140px] mx-auto">
-                  {Number(totalAmount).toLocaleString('ko-KR')}
-                </span>
-              </div>
-              <div className="h-28"></div> {/* 공간 보정용 */}
-            </div>
+            pieData.map((item, index) => {
+              const pct = totalAmount > 0 ? ((item.value / totalAmount) * 100).toFixed(1) : 0;
+              const color = COLORS[index % COLORS.length];
+              const catEmoji = groupBy === 'category' ? categories.find(c => c.name === item.name)?.emoji || '📁' : '💳';
+              
+              return (
+                <div
+                  key={item.name}
+                  onClick={() => setSelectedGroupItem(selectedGroupItem === item.name ? null : item.name)}
+                  className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border ${
+                    selectedGroupItem === item.name 
+                      ? 'bg-blue-50/50 border-toss-blue/35 shadow-sm' 
+                      : 'border-gray-100 hover:bg-gray-50'
+                  }`}
+                  style={{ boxSizing: 'border-box' }}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }}></span>
+                    <span className="text-xs text-gray-400 font-medium shrink-0">{catEmoji}</span>
+                    <span className="text-xs font-bold text-gray-700 truncate">{item.name}</span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-xs font-extrabold text-gray-800">{formatAmount(item.value)}</div>
+                    <div className="text-[10px] text-gray-400 font-bold">{pct}%</div>
+                  </div>
+                </div>
+              );
+            })
           )}
+        </div>
+        
+        <div className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center px-1">
+          <span className="text-xs font-bold text-gray-400">총합</span>
+          <span className="text-sm font-extrabold text-gray-800">{formatAmount(totalAmount)}</span>
         </div>
       </div>
 
-      {/* 3. 항목별 월별 추이 차트 (드릴다운 화면) */}
-      {selectedGroupItem && (
-        <>
-          {/* 디바이더 밴드 */}
-          <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
-          <div className="py-4 animate-slide-up">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
-                <TrendingUp size={16} className="text-toss-blue" />
-                {selectedGroupItem} - 월별 지출 추이 ({currentYear}년)
-              </h3>
-              <p className="text-[10px] text-gray-400 mt-1">
-                막대 그래프를 클릭하면 해당 월의 가계부 달력 뷰로 이동합니다.
-              </p>
-            </div>
+      {/* 디바이더 밴드 */}
+      <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
+
+      {/* 4. 월별 성과 추이 차트 영역 (하단) */}
+      <div className="py-4 bg-white rounded-2xl border border-gray-150/40 p-5 animate-slide-up">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5 select-none">
+              <TrendingUp size={16} className="text-toss-blue" />
+              {selectedGroupItem ? (
+                <span>{selectedGroupItem} - 월별 소비 추이 ({currentYear}년)</span>
+              ) : (
+                <span>월별 전체 소비 추이 ({currentYear}년)</span>
+              )}
+            </h3>
+            <p className="text-[10px] text-gray-400 mt-1 select-none">
+              {selectedGroupItem ? '막대 그래프를 클릭하면 해당 월의 가계부 달력 뷰로 이동합니다.' : '수입/지출 비교를 통해 소비 패턴을 점검해 보세요.'}
+            </p>
+          </div>
+          {selectedGroupItem && (
             <button
               onClick={() => setSelectedGroupItem(null)}
-              className="text-xs text-gray-400 hover:text-gray-600 font-bold"
+              className="text-xs text-gray-400 hover:text-gray-600 font-bold px-2.5 py-1 bg-gray-100 rounded-lg transition-colors"
             >
-              닫기
+              전체 보기
             </button>
-          </div>
+          )}
+        </div>
 
-          <div className="w-full h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={trendData}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F2F4F6" />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8B95A1' }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#8B95A1' }} tickLine={false} axisLine={false} />
-                <Tooltip content={<CustomBarTooltip />} cursor={{ fill: '#F9FAFB' }} />
+        <div className="w-full h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={selectedGroupItem ? trendData : overallTrendData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F2F4F6" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8B95A1' }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#8B95A1' }} tickLine={false} axisLine={false} />
+              <Tooltip content={selectedGroupItem ? <CustomBarTooltip /> : <CustomOverallTooltip />} cursor={{ fill: '#F9FAFB' }} />
+              
+              {selectedGroupItem ? (
                 <Bar
                   dataKey="amount"
                   fill={analysisType === 'expense' ? '#F04452' : '#00D387'}
@@ -307,12 +362,30 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                   cursor="pointer"
                   onClick={(data) => handleBarClick(data)}
                 />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          </div>
-        </>
-      )}
+              ) : (
+                <>
+                  <Bar
+                    dataKey="income"
+                    name="수입"
+                    fill="#00D387"
+                    radius={[4, 4, 0, 0]}
+                    cursor="pointer"
+                    onClick={(data) => handleBarClick(data)}
+                  />
+                  <Bar
+                    dataKey="expense"
+                    name="지출"
+                    fill="#FF6B6B"
+                    radius={[4, 4, 0, 0]}
+                    cursor="pointer"
+                    onClick={(data) => handleBarClick(data)}
+                  />
+                </>
+              )}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Plus, Trash2, FileDown, FileUp, AlertTriangle, CalendarDays, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useApp } from '../context/AppContext.jsx';
@@ -12,6 +12,7 @@ export default function SettingTab({
   baseDay,
   onAddCategory,
   onDeleteCategory,
+  onReorderCategories,
   onAddPaymentMethod,
   onDeletePaymentMethod,
   onRemoveRecurringRule,
@@ -20,6 +21,89 @@ export default function SettingTab({
   onResetAllData
 }) {
   const { editCategory } = useApp();
+
+  const [localCategories, setLocalCategories] = useState(categories);
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [draggedType, setDraggedType] = useState(null);
+
+  useEffect(() => {
+    setLocalCategories(categories);
+  }, [categories]);
+
+  const swapItems = (type, index1, index2) => {
+    const typedItems = localCategories.filter(c => c.type === type);
+    const otherItems = localCategories.filter(c => c.type !== type);
+    
+    const updatedTyped = [...typedItems];
+    const temp = updatedTyped[index1];
+    updatedTyped[index1] = updatedTyped[index2];
+    updatedTyped[index2] = temp;
+    
+    const absoluteIndex1 = localCategories.indexOf(typedItems[index1]);
+    const absoluteIndex2 = localCategories.indexOf(typedItems[index2]);
+    if (absoluteIndex1 !== -1 && absoluteIndex2 !== -1) {
+      const copy = [...localCategories];
+      const tempItem = copy[absoluteIndex1];
+      copy[absoluteIndex1] = copy[absoluteIndex2];
+      copy[absoluteIndex2] = tempItem;
+      setLocalCategories(copy);
+    }
+  };
+
+  const handleDragStart = (e, index, type) => {
+    setDraggedIndex(index);
+    setDraggedType(type);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, index, type) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedType !== type || draggedIndex === index) return;
+    swapItems(type, draggedIndex, index);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = async () => {
+    if (draggedIndex !== null) {
+      const orderedIds = localCategories.map(c => c.id);
+      await onReorderCategories(orderedIds);
+      setDraggedIndex(null);
+      setDraggedType(null);
+    }
+  };
+
+  const handleTouchStart = (index, type) => {
+    setDraggedIndex(index);
+    setDraggedType(type);
+  };
+
+  const handleTouchMove = (e, type) => {
+    if (draggedIndex === null || draggedType !== type) return;
+    const touch = e.touches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!targetEl) return;
+    
+    const itemEl = targetEl.closest('[data-drag-item]');
+    if (itemEl) {
+      const targetIndex = parseInt(itemEl.getAttribute('data-index'), 10);
+      const targetType = itemEl.getAttribute('data-type');
+      
+      if (targetType === type && targetIndex !== draggedIndex) {
+        swapItems(type, draggedIndex, targetIndex);
+        setDraggedIndex(targetIndex);
+      }
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    if (draggedIndex !== null) {
+      const orderedIds = localCategories.map(c => c.id);
+      await onReorderCategories(orderedIds);
+      setDraggedIndex(null);
+      setDraggedType(null);
+    }
+  };
 
   const [newCatName, setNewCatName] = useState('');
   const [newCatType, setNewCatType] = useState('expense');
@@ -285,66 +369,109 @@ export default function SettingTab({
       {/* 디바이더 밴드 */}
       <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
 
-      {/* 4. 카테고리 관리 (모바일 삐져나옴 원천 차단 개편) */}
+      {/* 4. 카테고리 관리 (모바일 삐져나옴 원천 차단 및 순서 정렬 개편) */}
       <div className="py-4 w-full overflow-hidden">
-        <h3 className="font-bold text-gray-800 text-sm mb-3">카테고리 관리</h3>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="font-bold text-gray-800 text-sm">카테고리 관리</h3>
+          <button
+            type="button"
+            onClick={() => setIsReorderMode(!isReorderMode)}
+            className={`text-xs px-2.5 py-1 rounded-lg font-bold transition-all ${
+              isReorderMode ? 'bg-toss-blue text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {isReorderMode ? '편집 완료' : '순서 편집'}
+          </button>
+        </div>
         
-        {/* 새 카테고리 등록 양식 - 모바일에서 유연하게 wrap 되도록 flex-wrap 설정 */}
-        <form onSubmit={handleAddCat} className="flex flex-wrap gap-1.5 mb-4 bg-gray-50 p-2.5 rounded-xl w-full overflow-hidden">
-          <select
-            value={newCatType}
-            onChange={(e) => setNewCatType(e.target.value)}
-            className="bg-white rounded-lg text-[10px] font-bold py-1 px-1.5 cursor-pointer focus:ring-1 focus:ring-toss-blue w-[56px] shrink-0 border-0 bg-gray-50/50"
-          >
-            <option value="expense">지출</option>
-            <option value="income">수입</option>
-          </select>
-          <select
-            value={newCatEmoji}
-            onChange={(e) => setNewCatEmoji(e.target.value)}
-            className="bg-white rounded-lg text-xs py-1 px-1 cursor-pointer focus:ring-1 focus:ring-toss-blue w-[44px] shrink-0 border-0 bg-gray-50/50"
-          >
-            {emojis.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-          <input
-            type="text"
-            required
-            placeholder="카테고리 이름"
-            value={newCatName}
-            onChange={(e) => setNewCatName(e.target.value)}
-            className="flex-1 min-w-[70px] bg-white focus:ring-2 focus:ring-toss-blue rounded-lg py-1 px-2 text-xs text-gray-800 border-0 bg-gray-50/50"
-          />
+        {/* 새 카테고리 등록 양식 - 모바일에서 줄바꿈이 깔끔한 2줄 flex-col 구조 */}
+        <form onSubmit={handleAddCat} className="flex flex-col gap-2 mb-4 bg-gray-50 p-3 rounded-xl w-full">
+          <div className="flex gap-1.5 w-full">
+            <select
+              value={newCatType}
+              onChange={(e) => setNewCatType(e.target.value)}
+              className="bg-white rounded-lg text-xs font-bold py-2 px-2.5 cursor-pointer focus:ring-2 focus:ring-toss-blue border-0 bg-gray-50/50 shrink-0 w-20"
+            >
+              <option value="expense">지출</option>
+              <option value="income">수입</option>
+            </select>
+            <select
+              value={newCatEmoji}
+              onChange={(e) => setNewCatEmoji(e.target.value)}
+              className="bg-white rounded-lg text-sm py-2 px-2 cursor-pointer focus:ring-2 focus:ring-toss-blue border-0 bg-gray-50/50 shrink-0 w-14"
+            >
+              {emojis.map(e => <option key={e} value={e}>{e}</option>)}
+            </select>
+            <input
+              type="text"
+              required
+              placeholder="카테고리 이름"
+              value={newCatName}
+              onChange={(e) => setNewCatName(e.target.value)}
+              className="flex-1 bg-white focus:ring-2 focus:ring-toss-blue rounded-lg py-2 px-3 text-xs text-gray-800 border-0 bg-gray-50/50 animate-fade-in"
+            />
+          </div>
           <button
             type="submit"
-            className="bg-toss-blue text-white hover:bg-toss-blue-dark px-3 py-1 rounded-lg text-xs font-bold transition-all shrink-0"
+            className="w-full bg-toss-blue text-white hover:bg-toss-blue-dark py-2 rounded-lg text-xs font-bold transition-all active:scale-[0.99]"
           >
-            추가
+            카테고리 추가
           </button>
         </form>
 
         {/* 카테고리 목록 리스트 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[250px] overflow-y-auto pr-1 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[280px] overflow-y-auto pr-1 w-full">
           {/* 지출 카테고리 */}
           <div className="w-full">
-            <span className="text-[10px] font-bold text-expense block mb-2 border-b border-red-50 pb-1">지출 카테고리 (아이콘 클릭 시 변경)</span>
-            <div className="flex flex-col gap-1 w-full">
-              {categories.filter(c => c.type === 'expense').map(c => {
+            <span className="text-[10px] font-bold text-expense block mb-2 border-b border-red-50 pb-1">
+              지출 카테고리 {isReorderMode ? '(드래그하여 순서 변경)' : '(아이콘 클릭 시 변경)'}
+            </span>
+            <div className="flex flex-col gap-1.5 w-full">
+              {localCategories.filter(c => c.type === 'expense').map((c, index) => {
                 const isPickerOpen = activeEmojiPickerCatId === c.id;
                 return (
-                  <div key={c.id} className="flex items-center justify-between py-1.5 px-2 hover:bg-gray-50 rounded-lg group text-xs relative w-full overflow-hidden">
+                  <div
+                    key={c.id}
+                    data-drag-item="true"
+                    data-index={index}
+                    data-type="expense"
+                    draggable={isReorderMode}
+                    onDragStart={(e) => handleDragStart(e, index, 'expense')}
+                    onDragOver={(e) => handleDragOver(e, index, 'expense')}
+                    onDragEnd={handleDragEnd}
+                    className={`flex items-center justify-between py-2 px-2.5 hover:bg-gray-50 rounded-xl group text-xs relative w-full overflow-hidden border ${
+                      isReorderMode
+                        ? 'border-dashed border-gray-200 cursor-grab active:cursor-grabbing bg-blue-50/10'
+                        : 'border-transparent'
+                    }`}
+                  >
                     <div className="flex items-center gap-1.5 min-w-0">
+                      {isReorderMode && (
+                        <span
+                          onTouchStart={() => handleTouchStart(index, 'expense')}
+                          onTouchMove={(e) => handleTouchMove(e, 'expense')}
+                          onTouchEnd={handleTouchEnd}
+                          className="mr-1 text-gray-400 select-none cursor-grab active:cursor-grabbing px-1 text-sm shrink-0"
+                          style={{ touchAction: 'none' }}
+                        >
+                          ☰
+                        </span>
+                      )}
+                      
                       {/* 이모지 인라인 피커 트리거 */}
                       <span 
-                        onClick={() => setActiveEmojiPickerCatId(isPickerOpen ? null : c.id)}
-                        className="cursor-pointer hover:bg-gray-150 p-1 rounded-md transition-colors text-sm select-none border border-transparent hover:border-gray-200 shrink-0"
-                        title="아이콘 교체"
+                        onClick={() => !isReorderMode && setActiveEmojiPickerCatId(isPickerOpen ? null : c.id)}
+                        className={`p-1 rounded-md transition-colors text-sm select-none border border-transparent shrink-0 ${
+                          isReorderMode ? 'cursor-default' : 'cursor-pointer hover:bg-gray-150 hover:border-gray-200'
+                        }`}
+                        title={isReorderMode ? undefined : '아이콘 교체'}
                       >
                         {c.emoji}
                       </span>
-                      <span className="font-semibold text-gray-700 truncate">{c.name}</span>
+                      <span className="font-bold text-gray-700 truncate">{c.name}</span>
                       
-                      {/* 미니 이모지 격자 팝오버 - 가로 폭 넘치지 않게 left-0 및 z-index 설정 */}
-                      {isPickerOpen && (
+                      {/* 미니 이모지 격자 팝오버 */}
+                      {isPickerOpen && !isReorderMode && (
                         <div className="absolute left-0 top-9 z-30 bg-white border border-gray-200/50 p-2 rounded-xl grid grid-cols-5 gap-1 animate-scale-up max-w-[210px]">
                           {emojis.map(emo => (
                             <span 
@@ -362,7 +489,7 @@ export default function SettingTab({
                     <button
                       type="button"
                       onClick={() => handleCategoryDelete(c.id)}
-                      className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0"
+                      className="text-gray-300 hover:text-red-500 transition-colors p-1 shrink-0"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -374,23 +501,53 @@ export default function SettingTab({
 
           {/* 수입 카테고리 */}
           <div className="w-full">
-            <span className="text-[10px] font-bold text-income block mb-2 border-b border-emerald-50 pb-1">수입 카테고리 (아이콘 클릭 시 변경)</span>
-            <div className="flex flex-col gap-1 w-full">
-              {categories.filter(c => c.type === 'income').map(c => {
+            <span className="text-[10px] font-bold text-income block mb-2 border-b border-emerald-50 pb-1">
+              수입 카테고리 {isReorderMode ? '(드래그하여 순서 변경)' : '(아이콘 클릭 시 변경)'}
+            </span>
+            <div className="flex flex-col gap-1.5 w-full">
+              {localCategories.filter(c => c.type === 'income').map((c, index) => {
                 const isPickerOpen = activeEmojiPickerCatId === c.id;
                 return (
-                  <div key={c.id} className="flex items-center justify-between py-1.5 px-2 hover:bg-gray-50 rounded-lg group text-xs relative w-full overflow-hidden">
+                  <div
+                    key={c.id}
+                    data-drag-item="true"
+                    data-index={index}
+                    data-type="income"
+                    draggable={isReorderMode}
+                    onDragStart={(e) => handleDragStart(e, index, 'income')}
+                    onDragOver={(e) => handleDragOver(e, index, 'income')}
+                    onDragEnd={handleDragEnd}
+                    className={`flex items-center justify-between py-2 px-2.5 hover:bg-gray-50 rounded-xl group text-xs relative w-full overflow-hidden border ${
+                      isReorderMode
+                        ? 'border-dashed border-gray-200 cursor-grab active:cursor-grabbing bg-blue-50/10'
+                        : 'border-transparent'
+                    }`}
+                  >
                     <div className="flex items-center gap-1.5 min-w-0">
+                      {isReorderMode && (
+                        <span
+                          onTouchStart={() => handleTouchStart(index, 'income')}
+                          onTouchMove={(e) => handleTouchMove(e, 'income')}
+                          onTouchEnd={handleTouchEnd}
+                          className="mr-1 text-gray-400 select-none cursor-grab active:cursor-grabbing px-1 text-sm shrink-0"
+                          style={{ touchAction: 'none' }}
+                        >
+                          ☰
+                        </span>
+                      )}
+                      
                       <span 
-                        onClick={() => setActiveEmojiPickerCatId(isPickerOpen ? null : c.id)}
-                        className="cursor-pointer hover:bg-gray-150 p-1 rounded-md transition-colors text-sm select-none border border-transparent hover:border-gray-200 shrink-0"
-                        title="아이콘 교체"
+                        onClick={() => !isReorderMode && setActiveEmojiPickerCatId(isPickerOpen ? null : c.id)}
+                        className={`p-1 rounded-md transition-colors text-sm select-none border border-transparent shrink-0 ${
+                          isReorderMode ? 'cursor-default' : 'cursor-pointer hover:bg-gray-150 hover:border-gray-200'
+                        }`}
+                        title={isReorderMode ? undefined : '아이콘 교체'}
                       >
                         {c.emoji}
                       </span>
-                      <span className="font-semibold text-gray-700 truncate">{c.name}</span>
+                      <span className="font-bold text-gray-700 truncate">{c.name}</span>
                       
-                      {isPickerOpen && (
+                      {isPickerOpen && !isReorderMode && (
                         <div className="absolute left-0 top-9 z-30 bg-white border border-gray-200/50 p-2 rounded-xl grid grid-cols-5 gap-1 animate-scale-up max-w-[210px]">
                           {emojis.map(emo => (
                             <span 
@@ -408,7 +565,7 @@ export default function SettingTab({
                     <button
                       type="button"
                       onClick={() => handleCategoryDelete(c.id)}
-                      className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0"
+                      className="text-gray-300 hover:text-red-500 transition-colors p-1 shrink-0"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -453,7 +610,7 @@ export default function SettingTab({
               <button
                 type="button"
                 onClick={() => handlePaymentMethodDelete(p.id)}
-                className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-0.5"
+                className="text-gray-300 hover:text-red-500 transition-colors shrink-0 p-0.5"
               >
                 <Trash2 size={12} />
               </button>
@@ -510,7 +667,7 @@ export default function SettingTab({
                         onRemoveRecurringRule(rule.id);
                       }
                     }}
-                    className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0"
+                    className="text-gray-300 hover:text-red-500 transition-colors p-1 shrink-0"
                   >
                     <Trash2 size={13} />
                   </button>

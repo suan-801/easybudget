@@ -486,55 +486,60 @@ export default function CalendarTab({
             <p className="text-sm">기록된 수입/지출 내역이 없습니다.</p>
           </div>
         ) : (
-          <div className="flex flex-col divide-y divide-gray-100">
+          <div className="flex flex-col divide-y divide-gray-100/70">
             {selectedDateRecords.map((record) => {
               const recordAsset = assets.find(a => String(a.id) === String(record.assetId));
               const catEmoji = categories.find(c => c.name === record.category)?.emoji || (record.type === 'income' ? '💰' : '💸');
               return (
-                <div key={record.id} className="flex justify-between items-center py-3.5 group animate-fade-in">
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-lg">
-                      {catEmoji}
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-sm text-gray-800">{record.category}</span>
-                        {/* 1번 피드백: '반복' 대신 '1개월마다' 등 둥근 파란 모서리 네모로 상세내역에 규칙 노출 */}
+                <div key={record.id} className="flex flex-col py-3.5 border-b border-gray-100/50 group animate-fade-in text-left">
+                  {/* 1행: 카테고리 정보 및 금액 */}
+                  <div className="flex justify-between items-center w-full">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-base shrink-0 select-none">
+                        {catEmoji}
+                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-extrabold text-sm sm:text-base text-gray-800 truncate">{record.category}</span>
                         {record.repeat && record.repeat !== 'none' && (
-                          <span className="bg-blue-50 text-toss-blue text-[9px] font-bold px-1.5 py-0.5 rounded-md select-none">
+                          <span className="bg-blue-50 text-toss-blue text-[9px] font-bold px-1.5 py-0.5 rounded-md select-none shrink-0">
                             {getRepeatLabel(record.repeat)}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-                        <span>{record.paymentMethod}</span>
-                        {recordAsset && (
-                          <>
-                            <span className="w-1 h-1 rounded-full bg-gray-200"></span>
-                            <span>{recordAsset.name}</span>
-                          </>
-                        )}
-                        {record.memo && (
-                          <>
-                            <span className="w-1 h-1 rounded-full bg-gray-200"></span>
-                            <span className="truncate max-w-[120px] italic">"{record.memo}"</span>
-                          </>
-                        )}
-                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <span className={`font-bold text-sm ${record.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                    <span className={`font-extrabold text-sm sm:text-base shrink-0 ${record.type === 'income' ? 'text-income' : 'text-expense'}`}>
                       {record.type === 'income' ? '+' : '-'}{formatAmount(record.amount)}원
                     </span>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  </div>
+
+                  {/* 2행: 결제/자산/메모 및 수정/삭제 액션 버튼 */}
+                  <div className="flex justify-between items-center mt-2 pl-[46px] w-full">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-400 min-w-0 flex-1 pr-2">
+                      <span className="truncate shrink-0">{record.paymentMethod}</span>
+                      {recordAsset && (
+                        <>
+                          <span className="w-0.5 h-0.5 rounded-full bg-gray-300 shrink-0"></span>
+                          <span className="truncate shrink-0">{recordAsset.name}</span>
+                        </>
+                      )}
+                      {record.memo && (
+                        <>
+                          <span className="w-0.5 h-0.5 rounded-full bg-gray-300 shrink-0"></span>
+                          <span className="text-gray-500 font-medium truncate italic">
+                            "{record.memo}"
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    
+                    {/* 액션 버튼 (상시 노출) */}
+                    <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={() => openEditModal(record)}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
+                        className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
                         title="수정"
                       >
-                        <Edit2 size={14} />
+                        <Edit2 size={13} />
                       </button>
                       <button
                         onClick={() => {
@@ -542,10 +547,10 @@ export default function CalendarTab({
                             onDeleteRecord(record.id);
                           }
                         }}
-                        className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
+                        className="p-1 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
                         title="삭제"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </div>
@@ -610,8 +615,10 @@ export default function CalendarTab({
                 <div className="relative">
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     required
-                    value={formAmount}
+                    value={formAmount ? Number(formAmount).toLocaleString('ko-KR') : ''}
                     onChange={handleAmountChange}
                     placeholder="0"
                     className="w-full bg-gray-50 border-0 focus:ring-2 focus:ring-toss-blue rounded-xl py-3 pl-4 pr-12 font-bold text-lg text-right text-gray-800 placeholder-gray-300"
@@ -797,8 +804,10 @@ export default function CalendarTab({
                       />
                       <input
                         type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         placeholder="초기잔액(원)"
-                        value={quickAddAssetBalance}
+                        value={quickAddAssetBalance ? Number(quickAddAssetBalance).toLocaleString('ko-KR') : ''}
                         onChange={(e) => setQuickAddAssetBalance(e.target.value.replace(/[^0-9]/g, ''))}
                         className="w-24 bg-white border border-gray-250 focus:ring-1 focus:ring-toss-blue rounded-lg py-1 px-2 text-xs text-gray-850 text-right font-semibold"
                       />

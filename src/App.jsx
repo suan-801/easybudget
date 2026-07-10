@@ -27,6 +27,7 @@ export default function App() {
     removeAsset,
     createCategory,
     removeCategory,
+    reorderCategories,
     createPaymentMethod,
     removePaymentMethod,
     createRecurringRule, // 신규
@@ -187,6 +188,7 @@ export default function App() {
             baseDay={baseDay}
             onAddCategory={createCategory}
             onDeleteCategory={removeCategory}
+            onReorderCategories={reorderCategories}
             onAddPaymentMethod={createPaymentMethod}
             onDeletePaymentMethod={removePaymentMethod}
             onRemoveRecurringRule={removeRecurringRule} // 신규

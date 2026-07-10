@@ -74,10 +74,16 @@ function _mapAssets(assetList) {
 }
 
 function _mapCategories(cats) {
-  return cats.map((c) => ({
-    ...c,
-    emoji: c.icon || '📌'
-  }));
+  return cats
+    .map((c) => ({
+      ...c,
+      emoji: c.icon || '📌'
+    }))
+    .sort((a, b) => {
+      const orderA = a.order !== undefined ? a.order : 9999;
+      const orderB = b.order !== undefined ? b.order : 9999;
+      return orderA - orderB;
+    });
 }
 
 // ==========================================
@@ -355,6 +361,15 @@ export function AppProvider({ children }) {
     setCategories(_mapCategories(cats));
   }, []);
 
+  const reorderCategories = useCallback(async (orderedIds) => {
+    for (let i = 0; i < orderedIds.length; i++) {
+      const id = orderedIds[i];
+      await updateCategory(id, { order: i });
+    }
+    const cats = await getAllCategories();
+    setCategories(_mapCategories(cats));
+  }, []);
+
   // ---------------------------------------------------------------------------
   // PaymentMethod operations
   // ---------------------------------------------------------------------------
@@ -496,6 +511,7 @@ export function AppProvider({ children }) {
     createCategory,
     editCategory,
     removeCategory,
+    reorderCategories,
     createPaymentMethod,
     editPaymentMethod,
     removePaymentMethod,
