@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash2, Edit2, Info } from 'lucide-react';
 
 function CustomDropdown({ options, selectedValue, onSelect, placeholder, showQuickAddBtn, onQuickAddClick, quickAddOpen }) {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = React.useRef(null);
+  const dropdownRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);

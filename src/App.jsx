@@ -41,12 +41,20 @@ export default function App() {
   } = useApp();
 
   const [baseDay, setBaseDay] = useState(() => {
-    return Number(localStorage.getItem('easybudget_base_day') || 1);
+    try {
+      return Number(localStorage.getItem('easybudget_base_day') || 1);
+    } catch (e) {
+      return 1;
+    }
   });
 
   const handleSetBaseDay = (day) => {
     setBaseDay(day);
-    localStorage.setItem('easybudget_base_day', day);
+    try {
+      localStorage.setItem('easybudget_base_day', day);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // 로딩 및 에러 스크린
