@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { BarChart3, TrendingUp, Info } from 'lucide-react';
 
 // 차트 및 프로그레스바용 토스 감성 파스텔톤 컬러 팔레트
@@ -32,7 +32,6 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
     const map = {};
     filteredRecords.forEach(r => {
       const date = new Date(r.date);
-      // 연도와 월이 모두 일치하는 경우만 비중에 반영 (월별 상세 분석 구현)
       if (date.getFullYear() === selectedYear && date.getMonth() === selectedMonth) {
         const key = groupBy === 'category' ? r.category : r.paymentMethod;
         if (!map[key]) map[key] = 0;
@@ -45,7 +44,6 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
       value: map[name]
     }));
 
-    // 큰 순서대로 정렬
     return data.sort((a, b) => b.value - a.value);
   };
 
@@ -224,7 +222,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5 select-none">
             <BarChart3 size={16} className="text-toss-blue" />
-            {analysisType === 'expense' ? '지출' : '수입'} 비중 및 상세 현황 ({selectedYear}년 {selectedMonth + 1}월)
+            {analysisType === 'expense' ? '지출' : '수입'} 비중 및 상세 현황
           </h3>
           
           {/* 연도 및 월 세부 선택 컨트롤러 */}
@@ -235,7 +233,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                 setSelectedYear(Number(e.target.value));
                 setSelectedGroupItem(null);
               }}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-750 cursor-pointer focus:ring-2 focus:ring-toss-blue outline-none"
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-755 cursor-pointer focus:ring-2 focus:ring-toss-blue outline-none"
             >
               {yearOptions.map(y => (
                 <option key={y} value={y}>{y}년</option>
@@ -247,7 +245,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                 setSelectedMonth(Number(e.target.value));
                 setSelectedGroupItem(null);
               }}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-750 cursor-pointer focus:ring-2 focus:ring-toss-blue outline-none"
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-755 cursor-pointer focus:ring-2 focus:ring-toss-blue outline-none"
             >
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i} value={i}>{i + 1}월</option>
@@ -358,7 +356,18 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                   radius={[6, 6, 0, 0]}
                   cursor="pointer"
                   style={{ outline: 'none' }}
-                />
+                >
+                  {trendData.map((entry, index) => {
+                    const isSelected = entry.monthIndex === selectedMonth;
+                    const baseColor = analysisType === 'expense' ? '#F04452' : '#00D387';
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={isSelected ? baseColor : `${baseColor}60`}
+                      />
+                    );
+                  })}
+                </Bar>
               ) : (
                 <>
                   <Bar
@@ -368,7 +377,17 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
                     style={{ outline: 'none' }}
-                  />
+                  >
+                    {overallTrendData.map((entry, index) => {
+                      const isSelected = entry.monthIndex === selectedMonth;
+                      return (
+                        <Cell
+                          key={`cell-income-${index}`}
+                          fill={isSelected ? '#00D387' : '#00D38755'}
+                        />
+                      );
+                    })}
+                  </Bar>
                   <Bar
                     dataKey="expense"
                     name="지출"
@@ -376,7 +395,17 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
                     style={{ outline: 'none' }}
-                  />
+                  >
+                    {overallTrendData.map((entry, index) => {
+                      const isSelected = entry.monthIndex === selectedMonth;
+                      return (
+                        <Cell
+                          key={`cell-expense-${index}`}
+                          fill={isSelected ? '#FF6B6B' : '#FF6B6B55'}
+                        />
+                      );
+                    })}
+                  </Bar>
                 </>
               )}
             </BarChart>

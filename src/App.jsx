@@ -159,6 +159,10 @@ export default function App() {
             assets={assets}
             categories={categories}
             paymentMethods={paymentMethods}
+            currentYear={currentYear}
+            currentMonth={currentMonth}
+            setCurrentYear={setCurrentYear}
+            setCurrentMonth={setCurrentMonth}
             onAddRecord={createRecord}
             onUpdateRecord={(record) => editRecord(record.id, record)}
             onDeleteRecord={removeRecord}

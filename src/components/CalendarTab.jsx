@@ -88,6 +88,10 @@ export default function CalendarTab({
   assets,
   categories,
   paymentMethods,
+  currentYear,
+  currentMonth,
+  setCurrentYear,
+  setCurrentMonth,
   onAddRecord,
   onUpdateRecord,
   onDeleteRecord,
@@ -96,7 +100,7 @@ export default function CalendarTab({
   onAddAsset,
   onCreateRecurringRule
 }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(() => new Date(currentYear, currentMonth - 1, 1));
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
@@ -144,12 +148,22 @@ export default function CalendarTab({
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
 
+  useEffect(() => {
+    setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
+  }, [currentYear, currentMonth]);
+
   const prevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
+    const nextDate = new Date(year, month - 1, 1);
+    setCurrentDate(nextDate);
+    setCurrentYear(nextDate.getFullYear());
+    setCurrentMonth(nextDate.getMonth() + 1);
   };
 
   const nextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
+    const nextDate = new Date(year, month + 1, 1);
+    setCurrentDate(nextDate);
+    setCurrentYear(nextDate.getFullYear());
+    setCurrentMonth(nextDate.getMonth() + 1);
   };
 
   // 금액 포맷 (3자리 콤마)
