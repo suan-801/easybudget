@@ -371,7 +371,7 @@ export default function SettingTab({
 
       {/* 4. 카테고리 관리 (모바일 삐져나옴 원천 차단 및 순서 정렬 개편) */}
       <div className="py-4 w-full overflow-hidden">
-        <div className="flex justify-between items-center mb-3">
+        <div className="flex justify-between items-center mb-1">
           <h3 className="font-bold text-gray-800 text-sm">카테고리 관리</h3>
           <button
             type="button"
@@ -383,6 +383,9 @@ export default function SettingTab({
             {isReorderMode ? '편집 완료' : '순서 편집'}
           </button>
         </div>
+        <p className="text-[10px] text-gray-400 mb-3.5 leading-normal select-none">
+          💡 각 카테고리의 아이콘(이모지)을 클릭하여 원하는 이모지로 즉시 변경할 수 있습니다.
+        </p>
         
         {/* 새 카테고리 등록 양식 - 모바일에서 줄바꿈이 깔끔한 2줄 flex-col 구조 */}
         <form onSubmit={handleAddCat} className="flex flex-col gap-2 mb-4 bg-gray-50 p-3 rounded-xl w-full">
@@ -424,7 +427,7 @@ export default function SettingTab({
           {/* 지출 카테고리 */}
           <div className="w-full">
             <span className="text-[10px] font-bold text-expense block mb-2 border-b border-red-50 pb-1">
-              지출 카테고리 {isReorderMode ? '(드래그하여 순서 변경)' : '(아이콘 클릭 시 변경)'}
+              지출 카테고리 {isReorderMode && '(드래그하여 순서 변경)'}
             </span>
             <div className="flex flex-col gap-1.5 w-full">
               {localCategories.filter(c => c.type === 'expense').map((c, index) => {
@@ -460,7 +463,7 @@ export default function SettingTab({
                       
                       {/* 이모지 인라인 피커 트리거 */}
                       <span 
-                        onClick={() => !isReorderMode && setActiveEmojiPickerCatId(isPickerOpen ? null : c.id)}
+                        onClick={() => !isReorderMode && setActiveEmojiPickerCatId(c.id)}
                         className={`p-1 rounded-md transition-colors text-sm select-none border border-transparent shrink-0 ${
                           isReorderMode ? 'cursor-default' : 'cursor-pointer hover:bg-gray-150 hover:border-gray-200'
                         }`}
@@ -469,21 +472,6 @@ export default function SettingTab({
                         {c.emoji}
                       </span>
                       <span className="font-bold text-gray-700 truncate">{c.name}</span>
-                      
-                      {/* 미니 이모지 격자 팝오버 */}
-                      {isPickerOpen && !isReorderMode && (
-                        <div className="absolute left-0 top-9 z-30 bg-white border border-gray-200/50 p-2 rounded-xl grid grid-cols-5 gap-1 animate-scale-up max-w-[210px]">
-                          {emojis.map(emo => (
-                            <span 
-                              key={emo} 
-                              onClick={() => handleEmojiChange(c.id, emo)}
-                              className="cursor-pointer hover:bg-gray-100 p-1 text-center text-sm transition-all active:scale-90"
-                            >
-                              {emo}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                     </div>
                     
                     <button
@@ -502,11 +490,10 @@ export default function SettingTab({
           {/* 수입 카테고리 */}
           <div className="w-full">
             <span className="text-[10px] font-bold text-income block mb-2 border-b border-emerald-50 pb-1">
-              수입 카테고리 {isReorderMode ? '(드래그하여 순서 변경)' : '(아이콘 클릭 시 변경)'}
+              수입 카테고리 {isReorderMode && '(드래그하여 순서 변경)'}
             </span>
             <div className="flex flex-col gap-1.5 w-full">
               {localCategories.filter(c => c.type === 'income').map((c, index) => {
-                const isPickerOpen = activeEmojiPickerCatId === c.id;
                 return (
                   <div
                     key={c.id}
@@ -537,7 +524,7 @@ export default function SettingTab({
                       )}
                       
                       <span 
-                        onClick={() => !isReorderMode && setActiveEmojiPickerCatId(isPickerOpen ? null : c.id)}
+                        onClick={() => !isReorderMode && setActiveEmojiPickerCatId(c.id)}
                         className={`p-1 rounded-md transition-colors text-sm select-none border border-transparent shrink-0 ${
                           isReorderMode ? 'cursor-default' : 'cursor-pointer hover:bg-gray-150 hover:border-gray-200'
                         }`}
@@ -546,20 +533,6 @@ export default function SettingTab({
                         {c.emoji}
                       </span>
                       <span className="font-bold text-gray-700 truncate">{c.name}</span>
-                      
-                      {isPickerOpen && !isReorderMode && (
-                        <div className="absolute left-0 top-9 z-30 bg-white border border-gray-200/50 p-2 rounded-xl grid grid-cols-5 gap-1 animate-scale-up max-w-[210px]">
-                          {emojis.map(emo => (
-                            <span 
-                              key={emo} 
-                              onClick={() => handleEmojiChange(c.id, emo)}
-                              className="cursor-pointer hover:bg-gray-100 p-1 text-center text-sm transition-all active:scale-90"
-                            >
-                              {emo}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                     </div>
                     
                     <button
@@ -691,6 +664,34 @@ export default function SettingTab({
           가계부 전체 초기화
         </button>
       </div>
+
+      {/* 이모지 선택 전역 모달 (잘림 방지) */}
+      {activeEmojiPickerCatId && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white w-full max-w-xs rounded-2xl border border-gray-150/40 p-5 shadow-xl animate-scale-up text-center">
+            <h4 className="font-bold text-gray-800 text-sm mb-3.5 select-none">
+              카테고리 아이콘 변경
+            </h4>
+            <div className="grid grid-cols-5 gap-2 max-w-[240px] mx-auto">
+              {emojis.map((emo) => (
+                <span
+                  key={emo}
+                  onClick={() => handleEmojiChange(activeEmojiPickerCatId, emo)}
+                  className="cursor-pointer hover:bg-gray-100 p-2 rounded-xl text-xl transition-all active:scale-90 hover:scale-105 select-none"
+                >
+                  {emo}
+                </span>
+              ))}
+            </div>
+            <button
+              onClick={() => setActiveEmojiPickerCatId(null)}
+              className="mt-4 w-full bg-gray-100 text-gray-600 hover:bg-gray-200 py-2 rounded-xl text-xs font-bold transition-colors"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
