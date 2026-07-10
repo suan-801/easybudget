@@ -492,17 +492,24 @@ export default function CalendarTab({
               const catEmoji = categories.find(c => c.name === record.category)?.emoji || (record.type === 'income' ? '💰' : '💸');
               return (
                 <div key={record.id} className="flex flex-col py-3.5 border-b border-gray-100/50 group animate-fade-in text-left">
-                  {/* 1행: 카테고리 정보 및 금액 */}
+                  {/* 1행: 카테고리 정보, 메모 및 금액 */}
                   <div className="flex justify-between items-center w-full">
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                       <span className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-base shrink-0 select-none">
                         {catEmoji}
                       </span>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="font-extrabold text-sm sm:text-base text-gray-800 truncate">{record.category}</span>
-                        {record.repeat && record.repeat !== 'none' && (
-                          <span className="bg-blue-50 text-toss-blue text-[9px] font-bold px-1.5 py-0.5 rounded-md select-none shrink-0">
-                            {getRepeatLabel(record.repeat)}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5 min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="font-extrabold text-sm sm:text-base text-gray-800 truncate">{record.category}</span>
+                          {record.repeat && record.repeat !== 'none' && (
+                            <span className="bg-blue-50 text-toss-blue text-[9px] font-bold px-1.5 py-0.5 rounded-md select-none shrink-0">
+                              {getRepeatLabel(record.repeat)}
+                            </span>
+                          )}
+                        </div>
+                        {record.memo && (
+                          <span className="text-xs text-gray-400 font-medium truncate sm:ml-1 shrink-0">
+                            {record.memo}
                           </span>
                         )}
                       </div>
@@ -512,22 +519,14 @@ export default function CalendarTab({
                     </span>
                   </div>
 
-                  {/* 2행: 결제/자산/메모 및 수정/삭제 액션 버튼 */}
+                  {/* 2행: 결제/자산 정보 및 수정/삭제 액션 버튼 */}
                   <div className="flex justify-between items-center mt-2 pl-[46px] w-full">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-400 min-w-0 flex-1 pr-2">
-                      <span className="truncate shrink-0">{record.paymentMethod}</span>
+                    <div className="flex items-center gap-1.5 text-[11px] text-gray-400 min-w-0 flex-1 pr-2">
+                      <span className="truncate shrink-0 font-medium">{record.paymentMethod}</span>
                       {recordAsset && (
                         <>
                           <span className="w-0.5 h-0.5 rounded-full bg-gray-300 shrink-0"></span>
-                          <span className="truncate shrink-0">{recordAsset.name}</span>
-                        </>
-                      )}
-                      {record.memo && (
-                        <>
-                          <span className="w-0.5 h-0.5 rounded-full bg-gray-300 shrink-0"></span>
-                          <span className="text-gray-500 font-medium truncate italic">
-                            "{record.memo}"
-                          </span>
+                          <span className="truncate shrink-0 font-medium">{recordAsset.name}</span>
                         </>
                       )}
                     </div>

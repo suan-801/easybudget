@@ -19,9 +19,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   const [analysisType, setAnalysisType] = useState('expense'); // 'expense' | 'income'
   const [groupBy, setGroupBy] = useState('category'); // 'category' | 'paymentMethod'
   const [selectedGroupItem, setSelectedGroupItem] = useState(null); // 클릭하여 상세 분석할 항목명
-
-  // 당해 연도 추출
-  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // 연도 선택 상태
 
   // 1. 전체 수입/지출 데이터 필터링
   const filteredRecords = records.filter(r => r.type === analysisType);
@@ -30,9 +28,13 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   const getPieData = () => {
     const map = {};
     filteredRecords.forEach(r => {
-      const key = groupBy === 'category' ? r.category : r.paymentMethod;
-      if (!map[key]) map[key] = 0;
-      map[key] += Number(r.amount);
+      const date = new Date(r.date);
+      // 비중 계산도 선택된 연도 데이터로 한정하여 분석의 일관성을 높임
+      if (date.getFullYear() === selectedYear) {
+        const key = groupBy === 'category' ? r.category : r.paymentMethod;
+        if (!map[key]) map[key] = 0;
+        map[key] += Number(r.amount);
+      }
     });
 
     const data = Object.keys(map).map(name => ({
@@ -57,7 +59,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
 
     records.forEach(r => {
       const date = new Date(r.date);
-      if (date.getFullYear() === currentYear && r.type === analysisType) {
+      if (date.getFullYear() === selectedYear && r.type === analysisType) {
         const itemKey = groupBy === 'category' ? r.category : r.paymentMethod;
         if (itemKey === itemName) {
           const m = date.getMonth();
@@ -80,7 +82,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
 
     records.forEach(r => {
       const date = new Date(r.date);
-      if (date.getFullYear() === currentYear) {
+      if (date.getFullYear() === selectedYear) {
         const m = date.getMonth();
         if (r.type === 'income') {
           months[m].income += Number(r.amount);
@@ -105,7 +107,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   const CustomBarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-xl border border-gray-150/40 text-xs shadow-md">
+        <div className="bg-white p-3 rounded-xl border border-gray-200/40 text-xs shadow-md">
           <p className="font-bold text-gray-800">{payload[0].payload.name}</p>
           <p className="text-toss-blue font-semibold mt-1">총액: {formatAmount(payload[0].value)}</p>
         </div>
@@ -132,12 +134,18 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
     return null;
   };
 
-  // 막대 그래프 클릭 시 이벤트 (해당 월 상세 화면으로 이동)
-  const handleBarClick = (data) => {
-    if (data && data.monthIndex !== undefined) {
-      onSelectMonth(currentYear, data.monthIndex);
-    }
+  // 가계부 데이터가 생성된 연도 범위 목록 생성 (연도 드롭다운 옵션용)
+  const getYearOptions = () => {
+    const years = new Set();
+    years.add(new Date().getFullYear()); // 기본값으로 올해 연도는 무조건 포함
+    records.forEach(r => {
+      const y = new Date(r.date).getFullYear();
+      if (!isNaN(y)) years.add(y);
+    });
+    return Array.from(years).sort((a, b) => b - a); // 최신 연도가 위로 오도록 정렬
   };
+
+  const yearOptions = getYearOptions();
 
   return (
     <div className="flex flex-col pb-24 animate-fade-in text-left">
@@ -201,10 +209,25 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
 
       {/* 2. 비중 상세 목록 및 가로 바 그래프 (중단) */}
       <div className="py-2 flex flex-col w-full">
-        <h3 className="font-bold text-gray-800 text-sm mb-4 flex items-center gap-1.5 select-none">
-          <BarChart3 size={16} className="text-toss-blue" />
-          {analysisType === 'expense' ? '지출' : '수입'} 비중 및 상세 현황
-        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5 select-none">
+            <BarChart3 size={16} className="text-toss-blue" />
+            {analysisType === 'expense' ? '지출' : '수입'} 비중 및 상세 현황 ({selectedYear}년)
+          </h3>
+          {/* 연도 드롭다운 셀렉터 */}
+          <select
+            value={selectedYear}
+            onChange={(e) => {
+              setSelectedYear(Number(e.target.value));
+              setSelectedGroupItem(null);
+            }}
+            className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-700 cursor-pointer focus:ring-2 focus:ring-toss-blue outline-none"
+          >
+            {yearOptions.map(y => (
+              <option key={y} value={y}>{y}년</option>
+            ))}
+          </select>
+        </div>
         
         <div className="flex flex-col gap-3.5 pr-1 pl-1 py-1">
           {pieData.length === 0 ? (
@@ -273,13 +296,13 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
             <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5 select-none">
               <TrendingUp size={16} className="text-toss-blue" />
               {selectedGroupItem ? (
-                <span>{selectedGroupItem} - 월별 소비 추이 ({currentYear}년)</span>
+                <span>{selectedGroupItem} - 월별 소비 추이 ({selectedYear}년)</span>
               ) : (
-                <span>월별 전체 소비 추이 ({currentYear}년)</span>
+                <span>월별 전체 소비 추이 ({selectedYear}년)</span>
               )}
             </h3>
             <p className="text-[10px] text-gray-400 mt-1 select-none">
-              {selectedGroupItem ? '막대 그래프를 클릭하면 해당 월의 가계부 달력 뷰로 이동합니다.' : '수입/지출 비교를 통해 소비 패턴을 점검해 보세요.'}
+              터치/마우스오버 시 수입, 지출, 순소비 상세 현황이 팝업됩니다.
             </p>
           </div>
           {selectedGroupItem && (
@@ -309,7 +332,6 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                   fill={analysisType === 'expense' ? '#F04452' : '#00D387'}
                   radius={[6, 6, 0, 0]}
                   cursor="pointer"
-                  onClick={(data) => handleBarClick(data)}
                 />
               ) : (
                 <>
@@ -319,7 +341,6 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                     fill="#00D387"
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
-                    onClick={(data) => handleBarClick(data)}
                   />
                   <Bar
                     dataKey="expense"
@@ -327,7 +348,6 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                     fill="#FF6B6B"
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
-                    onClick={(data) => handleBarClick(data)}
                   />
                 </>
               )}
