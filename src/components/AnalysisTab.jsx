@@ -19,18 +19,21 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   const [analysisType, setAnalysisType] = useState('expense'); // 'expense' | 'income'
   const [groupBy, setGroupBy] = useState('category'); // 'category' | 'paymentMethod'
   const [selectedGroupItem, setSelectedGroupItem] = useState(null); // 클릭하여 상세 분석할 항목명
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // 연도 선택 상태
+  
+  const today = new Date();
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear()); // 연도 선택 상태
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth()); // 월 선택 상태 (0-indexed)
 
   // 1. 전체 수입/지출 데이터 필터링
   const filteredRecords = records.filter(r => r.type === analysisType);
 
-  // 2. 비중 차트용 데이터 가공 (카테고리별 혹은 결제 수단별)
+  // 2. 비중 차트용 데이터 가공 (선택된 년 및 월 기준)
   const getPieData = () => {
     const map = {};
     filteredRecords.forEach(r => {
       const date = new Date(r.date);
-      // 비중 계산도 선택된 연도 데이터로 한정하여 분석의 일관성을 높임
-      if (date.getFullYear() === selectedYear) {
+      // 연도와 월이 모두 일치하는 경우만 비중에 반영 (월별 상세 분석 구현)
+      if (date.getFullYear() === selectedYear && date.getMonth() === selectedMonth) {
         const key = groupBy === 'category' ? r.category : r.paymentMethod;
         if (!map[key]) map[key] = 0;
         map[key] += Number(r.amount);
@@ -49,7 +52,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   const pieData = getPieData();
   const totalAmount = pieData.reduce((sum, item) => sum + item.value, 0);
 
-  // 3. 특정 항목(예: '식비')의 월별 지출/수입 추이 데이터 가공
+  // 3. 특정 항목(예: '식비')의 연간 월별 지출/수입 추이 데이터 가공 (선택된 연도 기준)
   const getMonthlyTrendData = (itemName) => {
     const months = Array.from({ length: 12 }, (_, i) => ({
       name: `${i + 1}월`,
@@ -71,7 +74,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
     return months;
   };
 
-  // 4. 월별 전체 수입 / 지출 합산 트렌드 데이터 가공
+  // 4. 연간 월별 전체 수입 / 지출 합산 트렌드 데이터 가공 (선택된 연도 기준)
   const getOverallMonthlyData = () => {
     const months = Array.from({ length: 12 }, (_, i) => ({
       name: `${i + 1}월`,
@@ -107,7 +110,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   const CustomBarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-xl border border-gray-200/40 text-xs shadow-md">
+        <div className="bg-white p-3 rounded-xl border border-gray-150/40 text-xs shadow-md">
           <p className="font-bold text-gray-800">{payload[0].payload.name}</p>
           <p className="text-toss-blue font-semibold mt-1">총액: {formatAmount(payload[0].value)}</p>
         </div>
@@ -149,6 +152,15 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
 
   return (
     <div className="flex flex-col pb-24 animate-fade-in text-left">
+      {/* 차트 선택/포커스 시 검은색 굵은 테두리 아웃라인을 원천 제거하는 인라인 스타일 */}
+      <style>{`
+        svg:focus, rect:focus, path:focus, g:focus, .recharts-wrapper:focus, .recharts-surface:focus {
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+      `}</style>
+
       {/* 1. 분석 필터 컨트롤러 */}
       <div className="py-2 flex flex-col md:flex-row justify-between items-center gap-3">
         {/* 수입 / 지출 선택 */}
@@ -212,28 +224,43 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5 select-none">
             <BarChart3 size={16} className="text-toss-blue" />
-            {analysisType === 'expense' ? '지출' : '수입'} 비중 및 상세 현황 ({selectedYear}년)
+            {analysisType === 'expense' ? '지출' : '수입'} 비중 및 상세 현황 ({selectedYear}년 {selectedMonth + 1}월)
           </h3>
-          {/* 연도 드롭다운 셀렉터 */}
-          <select
-            value={selectedYear}
-            onChange={(e) => {
-              setSelectedYear(Number(e.target.value));
-              setSelectedGroupItem(null);
-            }}
-            className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-700 cursor-pointer focus:ring-2 focus:ring-toss-blue outline-none"
-          >
-            {yearOptions.map(y => (
-              <option key={y} value={y}>{y}년</option>
-            ))}
-          </select>
+          
+          {/* 연도 및 월 세부 선택 컨트롤러 */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <select
+              value={selectedYear}
+              onChange={(e) => {
+                setSelectedYear(Number(e.target.value));
+                setSelectedGroupItem(null);
+              }}
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-750 cursor-pointer focus:ring-2 focus:ring-toss-blue outline-none"
+            >
+              {yearOptions.map(y => (
+                <option key={y} value={y}>{y}년</option>
+              ))}
+            </select>
+            <select
+              value={selectedMonth}
+              onChange={(e) => {
+                setSelectedMonth(Number(e.target.value));
+                setSelectedGroupItem(null);
+              }}
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-750 cursor-pointer focus:ring-2 focus:ring-toss-blue outline-none"
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={i}>{i + 1}월</option>
+              ))}
+            </select>
+          </div>
         </div>
         
         <div className="flex flex-col gap-3.5 pr-1 pl-1 py-1">
           {pieData.length === 0 ? (
             <div className="py-12 flex flex-col items-center justify-center text-gray-400 gap-2">
               <Info size={24} className="text-gray-300" />
-              <span className="text-xs">데이터가 존재하지 않습니다.</span>
+              <span className="text-xs">이번 달 데이터가 존재하지 않습니다.</span>
             </div>
           ) : (
             pieData.map((item, index) => {
@@ -281,7 +308,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
         </div>
         
         <div className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center px-1">
-          <span className="text-xs font-bold text-gray-400 select-none">총합</span>
+          <span className="text-xs font-bold text-gray-400 select-none">총합 ({selectedMonth + 1}월)</span>
           <span className="text-sm font-extrabold text-gray-800">{formatAmount(totalAmount)}</span>
         </div>
       </div>
@@ -301,9 +328,6 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                 <span>월별 전체 소비 추이 ({selectedYear}년)</span>
               )}
             </h3>
-            <p className="text-[10px] text-gray-400 mt-1 select-none">
-              터치/마우스오버 시 수입, 지출, 순소비 상세 현황이 팝업됩니다.
-            </p>
           </div>
           {selectedGroupItem && (
             <button
@@ -320,6 +344,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
             <BarChart
               data={selectedGroupItem ? trendData : overallTrendData}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              style={{ outline: 'none' }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F2F4F6" />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8B95A1' }} tickLine={false} axisLine={false} />
@@ -332,6 +357,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                   fill={analysisType === 'expense' ? '#F04452' : '#00D387'}
                   radius={[6, 6, 0, 0]}
                   cursor="pointer"
+                  style={{ outline: 'none' }}
                 />
               ) : (
                 <>
@@ -341,6 +367,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                     fill="#00D387"
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
+                    style={{ outline: 'none' }}
                   />
                   <Bar
                     dataKey="expense"
@@ -348,6 +375,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
                     fill="#FF6B6B"
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
+                    style={{ outline: 'none' }}
                   />
                 </>
               )}

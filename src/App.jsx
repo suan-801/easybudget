@@ -40,7 +40,14 @@ export default function App() {
     setCurrentMonth
   } = useApp();
 
-  const [baseDay, setBaseDay] = useState(1);
+  const [baseDay, setBaseDay] = useState(() => {
+    return Number(localStorage.getItem('easybudget_base_day') || 1);
+  });
+
+  const handleSetBaseDay = (day) => {
+    setBaseDay(day);
+    localStorage.setItem('easybudget_base_day', day);
+  };
 
   // 로딩 및 에러 스크린
   if (dbError) {
@@ -192,7 +199,7 @@ export default function App() {
             onAddPaymentMethod={createPaymentMethod}
             onDeletePaymentMethod={removePaymentMethod}
             onRemoveRecurringRule={removeRecurringRule} // 신규
-            onSetBaseDay={setBaseDay}
+            onSetBaseDay={handleSetBaseDay}
             onImportData={handleImportData}
             onResetAllData={handleResetAllData}
           />

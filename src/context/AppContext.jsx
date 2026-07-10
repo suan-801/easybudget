@@ -35,15 +35,6 @@ import {
   deleteRecurringRule, // 신규 반복 규칙 CRUD
 } from '../db/assetEngine.js';
 
-import {
-  computeMonthlyStats,
-  groupByCategory,
-  groupByPaymentMethod,
-  groupByDate,
-  buildMonthlyBarData,
-  buildDrilldownBarData,
-} from '../db/stats.js';
-
 import { exportToExcel, parseExcelFile, mapImportedRows } from '../db/excel.js';
 
 const AppContext = createContext(null);

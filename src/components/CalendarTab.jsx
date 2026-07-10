@@ -1,6 +1,88 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash2, Edit2, Info } from 'lucide-react';
 
+function CustomDropdown({ options, selectedValue, onSelect, placeholder, showQuickAddBtn, onQuickAddClick, quickAddOpen }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const selectedOption = options.find(opt => opt.name === selectedValue);
+
+  return (
+    <div className="relative w-full text-left" ref={dropdownRef}>
+      <div className="flex gap-2 w-full">
+        <div
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex-1 bg-gray-50 hover:bg-gray-100/70 active:scale-[0.99] border-0 focus:ring-2 focus:ring-toss-blue rounded-xl py-2.5 px-3.5 text-sm text-gray-800 font-bold flex items-center justify-between cursor-pointer transition-all select-none"
+        >
+          <span className="truncate">
+            {selectedOption ? (
+              <span className="flex items-center gap-1.5">
+                {selectedOption.emoji && <span className="text-base shrink-0">{selectedOption.emoji}</span>}
+                <span>{selectedOption.name}</span>
+              </span>
+            ) : (
+              <span className="text-gray-300 font-bold">{placeholder}</span>
+            )}
+          </span>
+          <span className="text-gray-400 text-[10px] transform transition-transform duration-200 select-none">
+            {isOpen ? '▲' : '▼'}
+          </span>
+        </div>
+
+        {showQuickAddBtn && (
+          <button
+            type="button"
+            onClick={onQuickAddClick}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3.5 rounded-xl text-sm font-bold transition-all shrink-0 active:scale-95"
+          >
+            {quickAddOpen ? '닫기' : '+ 추가'}
+          </button>
+        )}
+      </div>
+
+      {isOpen && (
+        <div className="absolute left-0 right-0 mt-1.5 z-40 bg-white border border-gray-150/70 p-1.5 rounded-xl shadow-lg max-h-[180px] overflow-y-auto animate-scale-up">
+          {options.length === 0 ? (
+            <div className="py-3 text-center text-xs text-gray-400 select-none font-bold">
+              등록된 항목이 없습니다.
+            </div>
+          ) : (
+            options.map((opt) => (
+              <div
+                key={opt.id}
+                onClick={() => {
+                  onSelect(opt.name);
+                  setIsOpen(false);
+                }}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                  selectedValue === opt.name
+                    ? 'bg-blue-50/70 text-toss-blue'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {opt.emoji && <span className="text-sm shrink-0">{opt.emoji}</span>}
+                <span className="truncate">{opt.name}</span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CalendarTab({
   records,
   assets,
@@ -640,31 +722,18 @@ export default function CalendarTab({
               {/* 카테고리 */}
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-1">카테고리</label>
-                <div className="flex gap-2">
-                  <select
-                    value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value)}
-                    className="flex-1 bg-gray-50 border-0 focus:ring-2 focus:ring-toss-blue rounded-xl py-2.5 px-3 text-sm text-gray-800"
-                  >
-                    {categories
-                      .filter((c) => c.type === formType)
-                      .map((c) => (
-                        <option key={c.id} value={c.name}>
-                          {c.emoji} {c.name}
-                        </option>
-                      ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuickAddName('');
-                      setShowQuickAdd(showQuickAdd === 'category' ? null : 'category');
-                    }}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3.5 rounded-xl text-sm font-bold transition-all"
-                  >
-                    {showQuickAdd === 'category' ? '닫기' : '+ 추가'}
-                  </button>
-                </div>
+                <CustomDropdown
+                  options={categories.filter((c) => c.type === formType)}
+                  selectedValue={formCategory}
+                  onSelect={(val) => setFormCategory(val)}
+                  placeholder="카테고리 선택"
+                  showQuickAddBtn={true}
+                  onQuickAddClick={() => {
+                    setQuickAddName('');
+                    setShowQuickAdd(showQuickAdd === 'category' ? null : 'category');
+                  }}
+                  quickAddOpen={showQuickAdd === 'category'}
+                />
 
                 {/* 카테고리 바로 밑에 추가 양식 노출 및 아이콘 선택 */}
                 {showQuickAdd === 'category' && (
@@ -699,29 +768,18 @@ export default function CalendarTab({
               {/* 결제 수단 */}
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-1">결제 수단</label>
-                <div className="flex gap-2">
-                  <select
-                    value={formPaymentMethod}
-                    onChange={(e) => handlePaymentMethodChange(e.target.value)}
-                    className="flex-1 bg-gray-50 border-0 focus:ring-2 focus:ring-toss-blue rounded-xl py-2.5 px-3 text-sm text-gray-800"
-                  >
-                    {paymentMethods.map((p) => (
-                      <option key={p.id} value={p.name}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuickAddName('');
-                      setShowQuickAdd(showQuickAdd === 'paymentMethod' ? null : 'paymentMethod');
-                    }}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3.5 rounded-xl text-sm font-bold transition-all"
-                  >
-                    {showQuickAdd === 'paymentMethod' ? '닫기' : '+ 추가'}
-                  </button>
-                </div>
+                <CustomDropdown
+                  options={paymentMethods}
+                  selectedValue={formPaymentMethod}
+                  onSelect={(val) => handlePaymentMethodChange(val)}
+                  placeholder="결제 수단 선택"
+                  showQuickAddBtn={true}
+                  onQuickAddClick={() => {
+                    setQuickAddName('');
+                    setShowQuickAdd(showQuickAdd === 'paymentMethod' ? null : 'paymentMethod');
+                  }}
+                  quickAddOpen={showQuickAdd === 'paymentMethod'}
+                />
 
                 {/* 결제 수단 바로 밑에 추가 양식 노출 */}
                 {showQuickAdd === 'paymentMethod' && (
@@ -762,31 +820,19 @@ export default function CalendarTab({
                     </label>
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <select
-                    value={formAsset}
-                    onChange={(e) => setFormAsset(e.target.value)}
-                    className="flex-1 bg-gray-50 border-0 focus:ring-2 focus:ring-toss-blue rounded-xl py-2.5 px-3 text-sm text-gray-800"
-                  >
-                    <option value="">연동 안 함</option>
-                    {assets.map((a) => (
-                      <option key={a.id} value={a.name}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuickAddName('');
-                      setQuickAddAssetBalance('');
-                      setShowQuickAdd(showQuickAdd === 'asset' ? null : 'asset');
-                    }}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3.5 rounded-xl text-sm font-bold transition-all"
-                  >
-                    {showQuickAdd === 'asset' ? '닫기' : '+ 추가'}
-                  </button>
-                </div>
+                <CustomDropdown
+                  options={assets}
+                  selectedValue={formAsset}
+                  onSelect={(val) => setFormAsset(val)}
+                  placeholder="연동 안 함 (선택)"
+                  showQuickAddBtn={true}
+                  onQuickAddClick={() => {
+                    setQuickAddName('');
+                    setQuickAddAssetBalance('');
+                    setShowQuickAdd(showQuickAdd === 'asset' ? null : 'asset');
+                  }}
+                  quickAddOpen={showQuickAdd === 'asset'}
+                />
 
                 {/* 연동 자산 바로 밑에 추가 양식 노출 */}
                 {showQuickAdd === 'asset' && (
