@@ -181,7 +181,6 @@ export default function AssetTab({
                   <input
                     type="text"
                     inputMode="numeric"
-                    pattern="[0-9]*"
                     required
                     placeholder="0"
                     value={assetBalance ? Number(assetBalance).toLocaleString('ko-KR') : ''}

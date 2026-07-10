@@ -616,7 +616,6 @@ export default function CalendarTab({
                   <input
                     type="text"
                     inputMode="numeric"
-                    pattern="[0-9]*"
                     required
                     value={formAmount ? Number(formAmount).toLocaleString('ko-KR') : ''}
                     onChange={handleAmountChange}
@@ -805,7 +804,6 @@ export default function CalendarTab({
                       <input
                         type="text"
                         inputMode="numeric"
-                        pattern="[0-9]*"
                         placeholder="초기잔액(원)"
                         value={quickAddAssetBalance ? Number(quickAddAssetBalance).toLocaleString('ko-KR') : ''}
                         onChange={(e) => setQuickAddAssetBalance(e.target.value.replace(/[^0-9]/g, ''))}
