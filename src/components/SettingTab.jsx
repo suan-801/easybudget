@@ -432,6 +432,7 @@ export default function SettingTab({
             <div className="flex flex-col gap-1.5 w-full">
               {localCategories.filter(c => c.type === 'expense').map((c, index) => {
                 const isPickerOpen = activeEmojiPickerCatId === c.id;
+                const isDragging = draggedIndex === index && draggedType === 'expense';
                 return (
                   <div
                     key={c.id}
@@ -442,10 +443,12 @@ export default function SettingTab({
                     onDragStart={(e) => handleDragStart(e, index, 'expense')}
                     onDragOver={(e) => handleDragOver(e, index, 'expense')}
                     onDragEnd={handleDragEnd}
-                    className={`flex items-center justify-between py-2 px-2.5 hover:bg-gray-50 rounded-xl group text-xs relative w-full overflow-hidden border ${
-                      isReorderMode
-                        ? 'border-dashed border-gray-200 cursor-grab active:cursor-grabbing bg-blue-50/10'
-                        : 'border-transparent'
+                    className={`flex items-center justify-between py-2 px-2.5 rounded-xl group text-xs relative w-full overflow-hidden border transition-all duration-150 ${
+                      isDragging
+                        ? 'opacity-40 bg-blue-50 border-toss-blue/50 shadow-md scale-[0.98]'
+                        : isReorderMode
+                          ? 'border-dashed border-gray-200 cursor-grab active:cursor-grabbing bg-blue-50/10 hover:bg-white hover:shadow-md hover:border-toss-blue/30 active:scale-[0.99]'
+                          : 'border-transparent hover:bg-gray-50'
                     }`}
                   >
                     <div className="flex items-center gap-1.5 min-w-0">
@@ -494,6 +497,7 @@ export default function SettingTab({
             </span>
             <div className="flex flex-col gap-1.5 w-full">
               {localCategories.filter(c => c.type === 'income').map((c, index) => {
+                const isDragging = draggedIndex === index && draggedType === 'income';
                 return (
                   <div
                     key={c.id}
@@ -504,10 +508,12 @@ export default function SettingTab({
                     onDragStart={(e) => handleDragStart(e, index, 'income')}
                     onDragOver={(e) => handleDragOver(e, index, 'income')}
                     onDragEnd={handleDragEnd}
-                    className={`flex items-center justify-between py-2 px-2.5 hover:bg-gray-50 rounded-xl group text-xs relative w-full overflow-hidden border ${
-                      isReorderMode
-                        ? 'border-dashed border-gray-200 cursor-grab active:cursor-grabbing bg-blue-50/10'
-                        : 'border-transparent'
+                    className={`flex items-center justify-between py-2 px-2.5 rounded-xl group text-xs relative w-full overflow-hidden border transition-all duration-150 ${
+                      isDragging
+                        ? 'opacity-40 bg-blue-50 border-toss-blue/50 shadow-md scale-[0.98]'
+                        : isReorderMode
+                          ? 'border-dashed border-gray-200 cursor-grab active:cursor-grabbing bg-blue-50/10 hover:bg-white hover:shadow-md hover:border-toss-blue/30 active:scale-[0.99]'
+                          : 'border-transparent hover:bg-gray-50'
                     }`}
                   >
                     <div className="flex items-center gap-1.5 min-w-0">

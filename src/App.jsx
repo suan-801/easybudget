@@ -3,7 +3,7 @@ import CalendarTab from './components/CalendarTab';
 import AnalysisTab from './components/AnalysisTab';
 import AssetTab from './components/AssetTab';
 import SettingTab from './components/SettingTab';
-import { useApp } from './context/AppContext';
+import { useApp } from './context/AppContext.jsx';
 import { Settings, TrendingUp } from 'lucide-react';
 
 export default function App() {

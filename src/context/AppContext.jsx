@@ -521,6 +521,7 @@ export function AppProvider({ children }) {
     getDrilldownBarData,
     handleExport,
     handleImport,
+    getAllRecords,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

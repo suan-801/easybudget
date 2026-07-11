@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Wallet, Landmark, CreditCard, Layers, Plus, Trash2, Edit2, Info, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import CustomDropdown from './CustomDropdown';
+import { useApp } from '../context/AppContext.jsx';
 
 export default function AssetTab({
   assets,
@@ -8,6 +10,25 @@ export default function AssetTab({
   onUpdateAsset,
   onDeleteAsset
 }) {
+  const { getAllRecords, categories, paymentMethods } = useApp();
+  const [allRecords, setAllRecords] = useState([]);
+
+  useEffect(() => {
+    getAllRecords().then(recs => {
+      // 카테고리 및 결제수단 명칭 조인 매핑
+      const mapped = recs.map(r => {
+        const cat = categories.find(c => c.id === r.categoryId || String(c.id) === String(r.categoryId));
+        const pay = paymentMethods.find(p => p.id === r.paymentMethodId || String(p.id) === String(r.paymentMethodId));
+        return {
+          ...r,
+          category: cat ? cat.name : '미분류',
+          paymentMethod: pay ? pay.name : '미지정'
+        };
+      });
+      setAllRecords(mapped);
+    });
+  }, [records, categories, paymentMethods, getAllRecords]);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState(null);
   
@@ -18,6 +39,10 @@ export default function AssetTab({
 
   // 클릭하여 선택된 자산 ID (8번 피드백: 당월 수입/지출 내역 노출용)
   const [selectedAssetId, setSelectedAssetId] = useState(null);
+
+  const today = new Date();
+  const [assetFilterYear, setAssetFilterYear] = useState(today.getFullYear());
+  const [assetFilterMonth, setAssetFilterMonth] = useState(today.getMonth()); // 0-indexed
 
   // 금액 3자리 콤마
   const formatAmount = (num) => {
@@ -90,15 +115,36 @@ export default function AssetTab({
     setAssetBalance(value);
   };
 
-  // 당월 필터 데이터 추출 (8번 피드백)
+  // 선택된 자산의 년/월 필터 데이터 추출
   const getSelectedAssetMonthlyRecords = () => {
     if (!selectedAssetId) return [];
-    const todayYM = new Date().toISOString().substring(0, 7); // YYYY-MM
-    return records.filter(r => 
-      (r.assetId === selectedAssetId || String(r.assetId) === String(selectedAssetId)) &&
-      r.date.substring(0, 7) === todayYM
-    );
+    return allRecords.filter(r => {
+      const isLinkedAsset = r.assetId === selectedAssetId || String(r.assetId) === String(selectedAssetId);
+      if (!isLinkedAsset) return false;
+      
+      // 타임존 오차를 피하기 위해 날짜 문자열 직접 파싱
+      const yearPart = Number(r.date.substring(0, 4));
+      const monthPart = Number(r.date.substring(5, 7)) - 1; // 0-indexed 보정
+      
+      return yearPart === assetFilterYear && monthPart === assetFilterMonth;
+    });
   };
+
+  // 자산 탭용 연도 목록 생성 (최근 3년 + 내년 정도를 포함하는 안전 목록)
+  const getAssetYearOptions = () => {
+    const years = new Set();
+    const currentY = new Date().getFullYear();
+    years.add(currentY);
+    years.add(currentY - 1);
+    years.add(currentY - 2);
+    allRecords.forEach(r => {
+      const y = new Date(r.date).getFullYear();
+      if (!isNaN(y)) years.add(y);
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  };
+
+  const assetYearOptions = getAssetYearOptions();
 
   const monthlyRecords = getSelectedAssetMonthlyRecords();
   const selectedAsset = assets.find(a => String(a.id) === String(selectedAssetId));
@@ -117,7 +163,7 @@ export default function AssetTab({
   const { income: assetIncome, expense: assetExpense } = getMonthlyRecordStats();
 
   return (
-    <div className="flex flex-col pb-24 animate-fade-in text-left">
+    <div className="flex flex-col pb-60 animate-fade-in text-left">
       {/* 1. 전체 자산 총액 요약 카드 */}
       <div className="bg-toss-blue p-6 rounded-2xl text-white flex flex-col justify-between min-h-[140px]">
         <div>
@@ -126,8 +172,7 @@ export default function AssetTab({
             {formatAmount(totalBalance)}
           </h2>
         </div>
-        <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/10">
-          <span className="text-[10px] text-white/60 font-bold">로컬 브라우저에 안전하게 보관 중</span>
+        <div className="flex justify-end items-center mt-4 pt-3 border-t border-white/10">
           <button
             onClick={openAddForm}
             className="bg-white/15 hover:bg-white/25 active:scale-95 transition-all text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"
@@ -162,16 +207,18 @@ export default function AssetTab({
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 mb-1">자산 구분</label>
-                <select
+                <CustomDropdown
+                  options={[
+                    { value: 'bank', label: '예적금/은행계좌', emoji: '🏦' },
+                    { value: 'cash', label: '현금', emoji: '💵' },
+                    { value: 'card', label: '체크·신용카드', emoji: '💳' },
+                    { value: 'etc', label: '기타 자산', emoji: '📂' }
+                  ]}
                   value={assetType}
-                  onChange={(e) => setAssetType(e.target.value)}
-                  className="w-full bg-gray-50 border-0 focus:ring-2 focus:ring-toss-blue rounded-xl py-2 px-3 text-xs text-gray-800"
-                >
-                  <option value="bank">예적금/은행계좌</option>
-                  <option value="cash">현금</option>
-                  <option value="card">체크·신용카드</option>
-                  <option value="etc">기타 자산</option>
-                </select>
+                  onSelect={setAssetType}
+                  placeholder="자산 구분 선택"
+                  size="sm"
+                />
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 mb-1">
@@ -213,7 +260,7 @@ export default function AssetTab({
 
       {/* 3. 자산 개별 목록 */}
       <div className="py-3">
-        <h3 className="font-bold text-gray-800 text-sm mb-4">개별 자산 현황 (자산 선택 시 당월 내역 상세 노출)</h3>
+        <h3 className="font-bold text-gray-800 text-sm mb-4">개별 자산 현황</h3>
         
         {assets.length === 0 ? (
           <div className="py-12 flex flex-col items-center justify-center text-gray-400 gap-2">
@@ -230,7 +277,7 @@ export default function AssetTab({
           <div className="flex flex-col divide-y divide-gray-100">
             {assets.map((asset) => {
               const { icon, bg, label } = getAssetIconInfo(asset.type);
-              const linkedCount = records.filter(r => String(r.assetId) === String(asset.id)).length;
+              const linkedCount = allRecords.filter(r => String(r.assetId) === String(asset.id)).length;
               const isSelected = selectedAssetId === asset.id;
 
               return (
@@ -304,25 +351,43 @@ export default function AssetTab({
           <div className="-mx-5 h-2.5 bg-[#F2F4F6] my-5"></div>
           <div className="py-3 animate-slide-down">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-3 mb-4 gap-2.5">
-            <div>
-              <h4 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
-                <Layers size={16} className="text-toss-blue" />
-                {selectedAsset.name} — 당월 연동 내역
+            <div className="min-w-0 flex-1">
+              <h4 className="font-bold text-gray-800 text-sm flex items-center gap-1.5 truncate">
+                <Layers size={16} className="text-toss-blue shrink-0" />
+                <span className="truncate">{selectedAsset.name} — 연동 내역</span>
               </h4>
-              <span className="text-[10px] text-gray-400 block mt-0.5">
-                이번 달에 발생하여 이 자산의 잔액에 반영된 거래 내역입니다. (총 {monthlyRecords.length}건)
+              <span className="text-[10px] text-gray-400 block mt-0.5 select-none">
+                선택한 년/월에 발생하여 이 자산의 잔액에 반영된 거래 내역입니다. (총 {monthlyRecords.length}건)
               </span>
             </div>
             
-            <div className="flex gap-3 text-[10px] font-bold text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-xl">
+            {/* 년도 및 월 선택 컨트롤러 */}
+            <div className="flex items-center gap-1.5 shrink-0 z-30 w-full sm:w-auto justify-start sm:justify-end">
+              <CustomDropdown
+                options={assetYearOptions.map(y => ({ value: y, label: `${y}년` }))}
+                value={assetFilterYear}
+                onSelect={(value) => setAssetFilterYear(Number(value))}
+                size="sm"
+                className="w-24"
+              />
+              <CustomDropdown
+                options={Array.from({ length: 12 }, (_, i) => ({ value: i, label: `${i + 1}월` }))}
+                value={assetFilterMonth}
+                onSelect={(value) => setAssetFilterMonth(Number(value))}
+                size="sm"
+                className="w-20"
+              />
+            </div>
+            
+            <div className="flex gap-3 text-[10px] font-bold text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-xl shrink-0 w-full sm:w-auto justify-center">
               <span className="text-income flex items-center gap-0.5">
                 <ArrowUpRight size={12} />
-                수입: +{formatAmount(assetIncome)}
+                수입: +{formatAmount(assetIncome).replace('원', '')}
               </span>
               <span className="text-gray-200">|</span>
               <span className="text-expense flex items-center gap-0.5">
                 <ArrowDownRight size={12} />
-                지출: -{formatAmount(assetExpense)}
+                지출: -{formatAmount(assetExpense).replace('원', '')}
               </span>
             </div>
           </div>
@@ -330,24 +395,23 @@ export default function AssetTab({
           {monthlyRecords.length === 0 ? (
             <div className="py-8 flex flex-col items-center justify-center text-gray-400 gap-1.5">
               <Info size={22} className="text-gray-300" />
-              <p className="text-xs">당월 이 자산에 연동된 수입/지출 내역이 없습니다.</p>
+              <p className="text-xs">{assetFilterYear}년 {assetFilterMonth + 1}월 이 자산에 연동된 거래 내역이 없습니다.</p>
             </div>
           ) : (
-            <div className="flex flex-col divide-y divide-gray-100 max-h-[250px] overflow-y-auto pr-1">
+            <div className="flex flex-col divide-y divide-gray-100 max-h-[280px] overflow-y-auto pr-1">
               {monthlyRecords.map((record) => (
                 <div key={record.id} className="flex justify-between items-center py-3 text-xs">
-                  <div className="flex flex-col gap-1 text-left">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-gray-800">{record.category}</span>
-                      <span className="text-gray-400 text-[10px]">{record.date.substring(5)}</span>
-                    </div>
-                    <div className="text-[10px] text-gray-400">
-                      <span>{record.paymentMethod}</span>
-                      {record.memo && <span className="italic ml-1">"{record.memo}"</span>}
-                    </div>
+                  <div className="flex flex-col gap-0.5 text-left">
+                    <span className="font-bold text-gray-800">
+                      {record.category}
+                    </span>
+                    <span className="text-gray-400 text-[10px] font-medium">
+                      {record.date.replace(/-/g, '.')}
+                      {record.memo ? ` | ${record.memo}` : ''}
+                    </span>
                   </div>
                   
-                  <span className={`font-bold ${record.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                  <span className={`font-extrabold ${record.type === 'income' ? 'text-income' : 'text-expense'}`}>
                     {record.type === 'income' ? '+' : '-'}{formatAmount(record.amount)}
                   </span>
                 </div>
