@@ -252,8 +252,8 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
       `}</style>
 
       {/* 1. 상단 타이틀 및 연도 선택 */}
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="text-base font-extrabold text-gray-800 flex items-center gap-1.5 select-none">
+      <div className="flex justify-between items-center mb-3 gap-2">
+        <h2 className="text-base font-extrabold text-gray-800 flex items-center gap-1.5 select-none shrink-0 whitespace-nowrap">
           <TrendingUp size={18} className="text-toss-blue" />
           월별 잔액 리포트
         </h2>
@@ -265,7 +265,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
             setSelectedGroupItem(null);
           }}
           size="sm"
-          className="w-24"
+          className="w-[84px] shrink-0"
         />
       </div>
 
