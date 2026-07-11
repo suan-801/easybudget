@@ -241,7 +241,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
   const yearOptions = getYearOptions();
 
   return (
-    <div className="flex flex-col pb-24 animate-fade-in text-left">
+    <div className="flex flex-col pb-24 animate-fade-in text-left w-full overflow-x-hidden max-w-full">
       {/* 차트 선택/포커스 시 검은색 굵은 테두리 아웃라인을 원천 제거하는 인라인 스타일 */}
       <style>{`
         svg:focus, rect:focus, path:focus, g:focus, .recharts-wrapper:focus, .recharts-surface:focus, .recharts-tooltip-wrapper:focus, .recharts-legend-wrapper:focus, .recharts-sector:focus {
@@ -252,7 +252,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
       `}</style>
 
       {/* 1. 상단 타이틀 및 연도 선택 */}
-      <div className="flex justify-between items-center mb-3 gap-2">
+      <div className="flex justify-between items-center mb-3 gap-2 w-full shrink-0">
         <h2 className="text-base font-extrabold text-gray-800 flex items-center gap-1.5 select-none shrink-0 whitespace-nowrap">
           <TrendingUp size={18} className="text-toss-blue" />
           월별 잔액 리포트
@@ -265,7 +265,7 @@ export default function AnalysisTab({ records, categories, onSwitchTab, onSelect
             setSelectedGroupItem(null);
           }}
           size="sm"
-          className="w-[84px] shrink-0"
+          className="w-[84px] min-w-[84px] max-w-[84px] shrink-0"
         />
       </div>
 
